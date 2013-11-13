@@ -32,10 +32,20 @@
 /* Includes ------------------------------------------------------------------- */
 #include "lpc17xx_emac.h"
 #include "lpc17xx_clkpwr.h"
+#include <csp_grp.h>/*interrupt definitions*/
+#include <csp.h>
 
 
 
 #ifdef _EMAC
+
+
+
+
+/*reciver semaphore*/
+OS_SEM *__ETH_RX_SEM;
+OS_MEM *__MEM_TX;
+OS_MEM *__MEM_RX;
 
 /* Private Variables ---------------------------------------------------------- */
 /** @defgroup EMAC_Private_Variables EMAC Private Variables
@@ -48,7 +58,8 @@ const uint8_t EMAC_clkdiv[] = { 4, 6, 8, 10, 14, 20, 28 };
 /* EMAC local DMA Descriptors */
 
 /** Rx Descriptor data array */
-static RX_Desc Rx_Desc[EMAC_NUM_RX_FRAG];
+//static RX_Desc Rx_Desc[EMAC_NUM_RX_FRAG];
+static __attribute__ ((aligned (4))) RX_Desc Rx_Desc[EMAC_NUM_RX_FRAG];
 
 /** Rx Status data array - Must be 8-Byte aligned */
 #if defined ( __CC_ARM   )
@@ -60,20 +71,94 @@ static RX_Stat Rx_Stat[EMAC_NUM_RX_FRAG];
 static __attribute__ ((aligned (8))) RX_Stat Rx_Stat[EMAC_NUM_RX_FRAG];
 #endif
 
-/** Tx Descriptor data array */
-static TX_Desc Tx_Desc[EMAC_NUM_TX_FRAG];
-/** Tx Status data array */
-static TX_Stat Tx_Stat[EMAC_NUM_TX_FRAG];
+static __attribute__ ((aligned (8))) RX_Stat Rx_Stat[EMAC_NUM_RX_FRAG];
 
-/* EMAC local DMA buffers */
-/*TODO: put these buffers in special sections*/
-/** Rx buffer data */
-static uint32_t eth_rx_buf[EMAC_NUM_RX_FRAG][EMAC_ETH_MAX_FLEN>>2];
-/** Tx buffer data */
-static uint32_t eth_tx_buf[EMAC_NUM_TX_FRAG][EMAC_ETH_MAX_FLEN>>2];
+
+/** Tx Descriptor data array */
+//static  TX_Desc Tx_Desc[EMAC_NUM_TX_FRAG];
+static __attribute__ ((aligned (4))) TX_Desc Tx_Desc[EMAC_NUM_TX_FRAG];
+
+/** Tx Status data array */
+//static  ((aligned (4))) TX_Stat Tx_Stat[EMAC_NUM_TX_FRAG];
+static __attribute__ ((aligned (4))) TX_Stat Tx_Stat[EMAC_NUM_TX_FRAG];
+
 /**
  * @}
  */
+
+/*ISR*/
+ void  CSP_IntETH_Handler (void  *p_arg) {
+
+	 	 uint32_t intStatus;
+	 	 uint32_t rcvStatus;
+	 	 OS_ERR os_err;
+		(void)p_arg;
+
+
+		intStatus = EMAC_IntReadStatus();
+		rcvStatus = LPC_EMAC->RSV;
+
+
+		if(intStatus & EMAC_INT_RX_OVERRUN) {
+			/*fatal, stay here for now*/
+			for(;;);
+		}
+
+
+
+		/*
+		 * INFO:
+		 * FROM LPC17xx_um.pdf - page 165
+		 * The EMAC doesn't distinguish the frame type and frame length, so, e.g. when the IP(0x8000) or
+		 *	ARP(0x0806) packets are received, it compares the frame type with the max length and gives the "Length
+		 *	out of range" error. In fact, this bit is not an error indication, but simply a statement by the chip regarding the
+		 *	status of the received frame.
+		 *	Thus, EMAC_RSV_LEN_OUTRNG together with the global error indicator from intStatus is ignored is ignored.
+		 *	Furthermore, drop all frames that are not OK for now
+		 */
+
+		if(intStatus & EMAC_INT_RX_DONE) {
+			EMAC_ClrIntSrc(EMAC_INT_RX_DONE);
+
+			if(!(rcvStatus & EMAC_RSV_REC_OK)) {
+				/*drop frame*/
+				EMAC_UpdateRxConsumeIndex();
+			} else {
+				/*trigger frame receiption*/
+				OSSemPost(__ETH_RX_SEM, OS_OPT_POST_1, &os_err);
+			}
+
+
+		}
+
+
+		if(intStatus & EMAC_INT_TX_DONE) {
+			//trigger transmission stuff
+			EMAC_ClrIntSrc(EMAC_INT_TX_DONE);
+		}
+
+
+			/**
+			 * - EMAC_INT_RX_OVERRUN: Receive Overrun
+ * 							- EMAC_INT_RX_ERR: Receive Error
+ * 							- EMAC_INT_RX_FIN: Receive Descriptor Finish
+ * 							- EMAC_INT_RX_DONE: Receive Done
+ * 							- EMAC_INT_TX_UNDERRUN: Transmit Under-run
+ * 							- EMAC_INT_TX_ERR: Transmit Error
+ * 							- EMAC_INT_TX_FIN: Transmit descriptor finish
+ * 							- EMAC_INT_TX_DONE: Transmit Done
+ * 							- EMAC_INT_SOFT_INT: Software interrupt
+ * 							- EMAC_INT_WAKEUP: Wakeup interrupt
+			 *
+			 *
+			 */
+
+
+		/*return from interrupt*/
+		/*clear interrupt source*/
+		CSP_IntClr (CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_ETHER_00);
+
+}
 
 /* Private Functions ---------------------------------------------------------- */
 static void rx_descr_init (void);
@@ -254,6 +339,25 @@ static int32_t emac_CRCCalc(uint8_t frame_no_fcs[], int32_t frame_len)
 }
 /* End of Private Functions --------------------------------------------------- */
 
+int OS_EMAC_Init(OS_SEM *rx_sem) {
+
+	OS_ERR os_err;
+
+	OSSemCreate(rx_sem, "RX_SEM", 0, &os_err);
+
+	if(os_err != OS_ERR_NONE)
+		return -1;
+
+	__ETH_RX_SEM = rx_sem;
+
+	/*setup emac dma buffers*/
+	eth_tx_buf = (uint32_t *)0x2007C000;
+	eth_rx_buf = (uint32_t *)(0x2007C000+( (EMAC_ETH_MAX_FLEN>>2)*EMAC_NUM_TX_FRAG ));
+
+	return 0;
+
+}
+
 
 /* Public Functions ----------------------------------------------------------- */
 /** @addtogroup EMAC_Public_Functions
@@ -282,8 +386,9 @@ static int32_t emac_CRCCalc(uint8_t frame_no_fcs[], int32_t frame_len)
  **********************************************************************/
 Status EMAC_Init(EMAC_CFG_Type *EMAC_ConfigStruct)
 {
+
 	/* Initialize the EMAC Ethernet controller. */
-	int32_t regv,tout, tmp;
+	int32_t tout, tmp;
 
 	/* Set up clock and power for Ethernet module */
 	CLKPWR_ConfigPPWR (CLKPWR_PCONP_PCENET, ENABLE);
@@ -359,7 +464,11 @@ Status EMAC_Init(EMAC_CFG_Type *EMAC_ConfigStruct)
 	LPC_EMAC->RxFilterCtrl = EMAC_RFC_MCAST_EN | EMAC_RFC_BCAST_EN | EMAC_RFC_PERFECT_EN;
 
 	/* Enable Rx Done and Tx Done interrupt for EMAC */
-	LPC_EMAC->IntEnable = EMAC_INT_RX_DONE | EMAC_INT_TX_DONE;
+	/*LPC_EMAC->IntEnable = EMAC_INT_RX_DONE | EMAC_INT_TX_DONE;*/
+
+	/* Enable Rx Done interrupt for EMAC */
+	LPC_EMAC->IntEnable = EMAC_INT_RX_DONE;
+
 
 	/* Reset all interrupts */
 	LPC_EMAC->IntClear  = 0xFFFF;
@@ -474,7 +583,7 @@ int32_t EMAC_CheckPHYStatus(uint32_t ulPHYState)
  **********************************************************************/
 int32_t EMAC_SetPHYMode(uint32_t ulPHYMode)
 {
-	int32_t id1, id2, tout, regv, id;
+	int32_t id1, id2, tout, regv;
 
 	/* Check if this is a DP83848C PHY. */
 	id1 = read_PHY (EMAC_PHY_REG_IDR1);
@@ -781,7 +890,8 @@ FlagStatus EMAC_GetWoLStatus(uint32_t ulWoLMode)
  **********************************************************************/
 void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 {
-	uint32_t idx,len;
+	uint32_t idx;
+	uint16_t len;
 	uint32_t *sp,*dp;
 
 	idx = LPC_EMAC->TxProduceIndex;
@@ -804,18 +914,20 @@ void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
  **********************************************************************/
 void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 {
-	uint32_t idx, len;
+	uint32_t idx;
+	uint16_t len;
 	uint32_t *dp, *sp;
 
 	idx = LPC_EMAC->RxConsumeIndex;
-	dp = (uint32_t *)pDataStruct->pbDataBuf;
-	sp = (uint32_t *)Rx_Desc[idx].Packet;
+	dp = (uint32_t *)(pDataStruct->pbDataBuf);
+	sp = (uint32_t *)Rx_Desc[idx].Packet;//OFFSET BUG?
 
 	if (pDataStruct->pbDataBuf != NULL) {
 		for (len = (pDataStruct->ulDataLen + 3) >> 2; len; len--) {
 			*dp++ = *sp++;
 		}
 	}
+
 
 }
 
@@ -864,7 +976,7 @@ void EMAC_IntCmd(uint32_t ulIntType, FunctionalState NewState)
  * @return		New state of specified interrupt (SET or RESET)
  **********************************************************************/
 IntStatus EMAC_IntGetStatus(uint32_t ulIntType)
-{
+{//TODO
 	if (LPC_EMAC->IntStatus & ulIntType) {
 		LPC_EMAC->IntClear = ulIntType;
 		return SET;
@@ -872,6 +984,8 @@ IntStatus EMAC_IntGetStatus(uint32_t ulIntType)
 		return RESET;
 	}
 }
+
+
 
 
 /*********************************************************************//**
@@ -987,6 +1101,61 @@ void EMAC_UpdateTxProduceIndex(void)
 	/* Start frame transmission */
 	if (++idx == EMAC_NUM_TX_FRAG) idx = 0;
 	LPC_EMAC->TxProduceIndex = idx;
+}
+
+
+void EMAC_PinCfg(void) {
+
+#ifdef eStickv2
+	int i;
+
+	PINSEL_CFG_Type PINSEL_InitStruct;
+
+	/*SETUP EMAC PIN_CFG*/
+	GPIO_SetDir(1,(1<<28),1);/*port, mask,direction 1 = output*/
+	GPIO_SetDir(1,(1<<8),1);
+
+	GPIO_ClearValue(1,(1<<28));				/* ETH Reset EN, resets (low reset) the phy and puts it in "strapping mode". Here ist is possible to configure the PHY. */
+	GPIO_ClearValue(1,(1<<8));				/* PHYAD 0x0   */
+
+	for(i=0;i<=1000;i++); /*definitely > than minimum required setup time*/
+
+	GPIO_SetValue(1,(1<<28));				/* ETH Reset DISABLE*/
+	GPIO_SetDir(1,(1<<8),0);
+
+	for(i=0;i<=1000;i++); /*definitely > than minimum required setup time*/
+
+	PINSEL_InitStruct.Funcnum=PINSEL_FUNC_1;/*alternative function*/
+	PINSEL_InitStruct.OpenDrain=PINSEL_PINMODE_NORMAL;
+	PINSEL_InitStruct.Pinmode=PINSEL_PINMODE_TRISTATE;
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_0; /*ENET_TXD0*/
+	PINSEL_InitStruct.Portnum=PINSEL_PORT_1;
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_1; /*ENET_TXD1*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_4; /*ENET_TXEN*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_8; /*ENET_CRS*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_9; /*ENET_RXD0*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_10; /*ENET_RXD1*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_14; /*ENET_RX_ER (receiver error indicator)*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	PINSEL_InitStruct.Pinnum=PINSEL_PIN_15; /*ENET_REF_CLK*/
+	PINSEL_ConfigPin(&PINSEL_InitStruct);
+
+	/*END PIN_CFG*/
+#endif	/*eStickv2*/
+
 }
 
 

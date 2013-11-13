@@ -35,8 +35,12 @@
 
 /* Includes ------------------------------------------------------------------- */
 #include "LPC17xx.h"
+#include "lpc17xx_pinsel.h"
+#include <lpc17xx_gpio.h>
 #include "lpc_types.h"
 #include <csp_cfg.h>
+#include <os.h>
+
 
 #ifdef __cplusplus
 extern "C"
@@ -47,6 +51,9 @@ extern "C"
 #undef IAR_LPC_1768
 #define eStickv2
 
+
+uint32_t __attribute__ ((aligned (4))) *eth_rx_buf;
+uint32_t __attribute__ ((aligned (4))) *eth_tx_buf;
 
 
 /* Public Macros -------------------------------------------------------------- */
@@ -77,8 +84,8 @@ extern "C"
 
 
 /* EMAC Memory Buffer configuration for 16K Ethernet RAM */
-#define EMAC_NUM_RX_FRAG         4           /**< Num.of RX Fragments 4*1536= 6.0kB */
-#define EMAC_NUM_TX_FRAG         3           /**< Num.of TX Fragments 3*1536= 4.6kB */
+#define EMAC_NUM_RX_FRAG         5           /**< Num.of RX Fragments 5*1536+2=7,5kB  */
+#define EMAC_NUM_TX_FRAG         5           /**< Num.of TX Fragments 5*1536+2=7,5kB  */
 #define EMAC_ETH_MAX_FLEN        1536        /**< Max. Ethernet Frame Size          */
 #define EMAC_TX_FRAME_TOUT       0x00100000  /**< Frame Transmit timeout count      */
 
@@ -679,7 +686,12 @@ EMAC_RINFO_LEN_ERR   | EMAC_RINFO_ALIGN_ERR | EMAC_RINFO_OVERRUN)
 #define EMAC_DEF_ADR    (0x0<<8)				 /**< Default PHY device address    */
 #define EMAC_KSZ8031_ID 0x0 /**< PHY Identifier       			*/
 /* #define EMAC_KSZ8031_ID ((0x22 << 16) | 0x1619 ) */ /**< PHY Identifier       			*/
+
+
+
 #endif /*estickv2*/
+
+
 
 /**
  * @}
@@ -728,6 +740,12 @@ typedef struct {
 /**
  * @brief TX Data Buffer structure definition
  */
+//typedef struct {
+//	uint32_t ulDataLen;			/**< Data length */
+	//uint32_t pbDataBuf[EMAC_ETH_MAX_FLEN];		/**< A word-align data pointer to data buffer */
+//	uint32_t *pbDataBuf;//[EMAC_ETH_MAX_FLEN];		/**< A word-align data pointer to data buffer */
+//} EMAC_PACKETBUF_Type;
+
 typedef struct {
 	uint32_t ulDataLen;			/**< Data length */
 	uint32_t *pbDataBuf;		/**< A word-align data pointer to data buffer */
@@ -759,9 +777,25 @@ typedef struct {
 /** @defgroup EMAC_Public_Functions EMAC Public Functions
  * @{
  */
+
+/*
+ *
+ * Configure uc pins to address PHY
+ */
+void EMAC_PinCfg(void);
+
+/**
+ * Initialiez OS dependant EMAC functions
+ *
+ */
+int OS_EMAC_Init(OS_SEM *rx_sem);
+
 /* Init/DeInit EMAC peripheral */
 Status EMAC_Init(EMAC_CFG_Type *EMAC_ConfigStruct);
 void EMAC_DeInit(void);
+
+/*Interrupt service routine -> ucOSII specific*/
+void  CSP_IntETH_Handler (void  *p_arg);
 
 /* PHY functions --------------*/
 int32_t EMAC_CheckPHYStatus(uint32_t ulPHYState);
@@ -773,8 +807,11 @@ void EMAC_SetHashFilter(uint8_t dstMAC_addr[], FunctionalState NewState);
 void EMAC_SetFilterMode(uint32_t ulFilterMode, FunctionalState NewState);
 
 /* EMAC Packet Buffer functions */
-void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct);
+//void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct);
+//void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct);
+
 void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct);
+void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct);
 
 /* EMAC Interrupt functions -------*/
 void EMAC_IntCmd(uint32_t ulIntType, FunctionalState NewState);
@@ -789,6 +826,19 @@ void EMAC_UpdateTxProduceIndex(void);
 FlagStatus EMAC_CheckReceiveDataStatus(uint32_t ulRxStatType);
 uint32_t EMAC_GetReceiveDataSize(void);
 FlagStatus EMAC_GetWoLStatus(uint32_t ulWoLMode);
+
+
+/*@brief Return status register
+ * @return See paramlist of EMAC_IntGetStatus()
+ * */
+#define EMAC_IntReadStatus() (LPC_EMAC->IntStatus)
+
+/*@brief clear correspronding interrupt source
+ * @param the interrupt source
+ * @return void
+ * */
+#define EMAC_ClrIntSrc(source) {LPC_EMAC->IntClear = source;}
+
 
 /**
  * @}
