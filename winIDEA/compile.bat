@@ -1,0 +1,2 @@
+cd ..
+/usr/bin/make

@@ -1,0 +1,35 @@
+env:
+  version: 9.12.69
+  useQualifiedFuncName: false
+  autoConnect: false
+  initBeforeRun: true
+  downloadOnInit: true
+  resetOnInit: false
+  runOnInit: true
+  stopFunction: main
+  deleteBreakpointsOnInit: false
+  disableInterrupts: false
+  breakpointType: keepWinIDEASetting
+  autoIdFormat: '${uid}'
+  defaultRetValName: rv
+  scriptConfig:
+    timeout: 10000
+  evaluatorConfig:
+    isOverrideWinIDEASettings: true
+    charDisplay: Both
+    isAnsiChar: true
+    isHex: true
+    binaryDisplay: Blanks
+    isDisplayPointerMemArea: true
+    isCharArrayAsString: true
+    isDereferenceStringPointers: true
+    addressDisplay: HexPrefix
+    enumDisplay: Both
+    isDisplayCollapsedArrayStruct: true
+    vagueFloatPrecision: 1e-5
+  testCaseTargetInit:
+    downloadOnTCInit: false
+    resetOnTCInit: false
+    runOnTCInit: false
+tests:
+- func: [testEndstops, [], TRUE]

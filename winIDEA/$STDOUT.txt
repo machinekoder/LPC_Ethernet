@@ -1,0 +1,4 @@
+
+Z:\home\alexander\projects\cnc-machine\embedded>cd .. 
+
+Z:\home\alexander\projects\cnc-machine>/usr/bin/make 

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbench progressCount="1" version="2.0">
+<workbenchAdvisor/>
+<window height="768" width="1024" x="576" y="132">
+<fastViewData fastViewLocation="1024"/>
+<perspectiveBar/>
+<coolbarLayout>
+<coolItem id="si.isystem.itest.coolbar" itemType="typeToolBarContribution" x="409" y="22"/>
+</coolbarLayout>
+<page focus="true" label="&lt;Unknown Label&gt; - Perspective">
+<editors>
+<editorArea activeWorkbook="DefaultEditorWorkbook">
+<info part="DefaultEditorWorkbook">
+<folder appearance="1" expanded="2">
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
+</folder>
+</info>
+</editorArea>
+</editors>
+<views>
+<view id="si.isystem.itest.ui.spec.errorsView" partName="Status">
+<viewState/>
+</view>
+<view id="si.isystem.itest.ui.spec.TestTreeView" partName="Test Tree">
+<viewState/>
+</view>
+<view id="si.isystem.itest.ui.spec.tesSpecEditorView" partName="Test Case Editor">
+<viewState/>
+</view>
+</views>
+<perspectives activePart="si.isystem.itest.ui.spec.tesSpecEditorView" activePerspective="si.isystem.itest.perspective">
+<perspective editorAreaTrimState="2" editorAreaVisible="0" fixed="1" version="0.016">
+<descriptor class="si.isystem.itest.main.TestPerspective" id="si.isystem.itest.perspective" label="Perspective"/>
+<view id="si.isystem.itest.ui.spec.TestTreeView"/>
+<view id="si.isystem.itest.ui.spec.tesSpecEditorView"/>
+<view id="si.isystem.itest.ui.spec.errorsView"/>
+<fastViewBars/>
+<viewLayoutRec closeable="false" id="si.isystem.itest.ui.spec.errorsView" moveable="false"/>
+<viewLayoutRec closeable="false" id="si.isystem.itest.ui.spec.TestTreeView" moveable="false"/>
+<viewLayoutRec closeable="false" id="si.isystem.itest.ui.spec.tesSpecEditorView" moveable="false"/>
+<layout>
+<mainWindow>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@b0c9f0">
+<folder activePageID="si.isystem.itest.ui.spec.TestTreeView" appearance="2" expanded="2">
+<page content="si.isystem.itest.ui.spec.TestTreeView" label="Test Tree"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="stickyFolderRight" ratio="0.75" ratioLeft="756" ratioRight="252" relationship="2" relative="org.eclipse.ui.internal.ViewStack@b0c9f0">
+<folder appearance="2" expanded="2">
+<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
+</folder>
+</info>
+<info part="org.eclipse.ui.editorss" ratio="0.19940476" ratioLeft="201" ratioRight="807" relationship="2" relative="org.eclipse.ui.internal.ViewStack@b0c9f0"/>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@99d1df" ratio="0.7992565" ratioLeft="645" ratioRight="162" relationship="2" relative="org.eclipse.ui.editorss">
+<folder activePageID="si.isystem.itest.ui.spec.tesSpecEditorView" appearance="2" expanded="2">
+<page content="si.isystem.itest.ui.spec.tesSpecEditorView" label="Test Case Editor"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@a19624" ratio="0.7492492" ratioLeft="499" ratioRight="167" relationship="4" relative="org.eclipse.ui.internal.ViewStack@99d1df">
+<folder activePageID="si.isystem.itest.ui.spec.errorsView" appearance="2" expanded="2">
+<page content="si.isystem.itest.ui.spec.errorsView" label="Status"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+</presentation>
+</folder>
+</info>
+</mainWindow>
+</layout>
+</perspective>
+</perspectives>
+<workingSets/>
+<navigationHistory/>
+</page>
+<workbenchWindowAdvisor/>
+<actionBarAdvisor/>
+<trimLayout>
+<trimArea IMemento.internal.id="128">
+<trimItem IMemento.internal.id="org.eclipse.ui.internal.WorkbenchWindow.topBar"/>
+</trimArea>
+<trimArea IMemento.internal.id="1024">
+<trimItem IMemento.internal.id="org.eclipse.jface.action.StatusLineManager"/>
+</trimArea>
+</trimLayout>
+</window>
+<mruList/>
+</workbench>
