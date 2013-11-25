@@ -50,6 +50,18 @@ void EthernetLinkLayer_processRxData(void)
     
 }
 
+int8_t EthernetLinkLayer_sendPacket(uint32_t* data, uint32_t size)
+{
+    if (size > TX_DATA_BUFFER_SIZE) // check packet size
+    {
+        return (int8_t)(-1);
+    }
+    
+    memcpy((void*)txDataBuffer,(void*)data,size);
+    
+    return (int8_t)0;
+}
+
 uint8_t* EthernetLinkLayer_macAddress(void)
 {
     return macAddress;
