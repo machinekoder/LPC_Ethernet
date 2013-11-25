@@ -11,9 +11,7 @@ void App_TaskLed (void *p_arg)
     
     while (DEF_TRUE)
     {
-        Led_set(Led1);
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-        Led_clear(Led1);
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0u, 0u, 0u, 500u,OS_OPT_TIME_HMSM_STRICT,&err);
+        Led_toggle(Led1);
     }
 }

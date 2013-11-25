@@ -5,7 +5,7 @@
 #define RX_DATA_BUFFER_SIZE 256u
 #define TX_DATA_BUFFER_SIZE 256u
 
-uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x00u,0x05u};
+uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};
 
 OS_SEM rxSemaphore;
 uint32_t rxDataBuffer[RX_DATA_BUFFER_SIZE];

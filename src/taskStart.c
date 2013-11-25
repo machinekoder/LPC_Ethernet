@@ -1,4 +1,8 @@
-#include "app.h"
+#include "taskStart.h"
+#include "taskLed.h"
+#include "taskUsbConnection.h"
+#include "ethernetLinkLayer.h"
+
 /*
 ************************************************************************************************
 *                                          STARTUP TASK
@@ -29,6 +33,7 @@ void App_TaskStart (void *p_arg)
 #ifdef CPU_CFG_INT_DIS_MEAS_EN
     CPU_IntDisMeasMaxCurReset();
 #endif
+#if 0
     OSTaskCreate((OS_TCB     *)&App_TaskUsbConnectionTCB,
                 (CPU_CHAR   *)"UsbConnection",
                 (OS_TASK_PTR )App_TaskUsbConnection,
@@ -42,6 +47,8 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                 (OS_ERR     *)&err);
+#endif
+
     OSTaskCreate((OS_TCB     *)&App_TaskLedTCB,
                 (CPU_CHAR   *)"Led",
                 (OS_TASK_PTR )App_TaskLed,

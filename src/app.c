@@ -3,6 +3,8 @@
  *
  **/
 #include "app.h"
+#include "taskStart.h"
+#include "ethernetLinkLayer.h"
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
@@ -103,11 +105,19 @@ int main (void)
 #endif
 
     EMAC_PinCfg();
-    OS_EMAC_Init(EthernetLinkLayer_rxSemaphore());
     emacConfigStruct.Mode = EMAC_MODE_100M_FULL;
     emacConfigStruct.pbEMAC_Addr = EthernetLinkLayer_macAddress();
+    EMAC_Init(&emacConfigStruct);
+    OS_EMAC_Init(EthernetLinkLayer_rxSemaphore());
+    
+    //CSP_IntInit();
+    CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
+                   (CSP_DEV_NBR   )CSP_INT_SRC_NBR_ETHER_00,
+                   (CPU_FNCT_PTR  )CSP_IntETH_Handler,
+                   (void         *)0);
+    CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_ETHER_00);
 
-
+#if 0
     USBInit();                                               /* USB Initialization */
     /* register descriptors */
     USBRegisterDescriptors(abDescriptors);                   /* USB Descriptor Initialization */
@@ -122,7 +132,7 @@ int main (void)
 
     /* enable bulk-in interrupts on NAKs */
     USBHwNakIntEnable(INACK_BI);
-
+#endif
     //Cb_initialize(&cncQueueBuffer, CNC_QUEUE_BUFFER_SIZE, sizeof(QueueItem), (void*)&cncQueueBufferData);
     
     Debug_printf(Debug_Level_1, "Init finished");

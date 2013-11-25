@@ -1112,16 +1112,16 @@ void EMAC_PinCfg(void) {
 	PINSEL_CFG_Type PINSEL_InitStruct;
 
 	/*SETUP EMAC PIN_CFG*/
-	GPIO_SetDir(1,(1<<28),1);/*port, mask,direction 1 = output*/
-	GPIO_SetDir(1,(1<<8),1);
+	GPIO_SetDir(1u,(1<<28),1u);/*port, mask,direction 1 = output*/
+	GPIO_SetDir(1u,(1<<8),1u);
 
-	GPIO_ClearValue(1,(1<<28));				/* ETH Reset EN, resets (low reset) the phy and puts it in "strapping mode". Here ist is possible to configure the PHY. */
-	GPIO_ClearValue(1,(1<<8));				/* PHYAD 0x0   */
+	GPIO_ClearValue(1u,(1<<28));				/* ETH Reset EN, resets (low reset) the phy and puts it in "strapping mode". Here ist is possible to configure the PHY. */
+	GPIO_ClearValue(1u,(1<<8));				/* PHYAD 0x0   */
 
 	for(i=0;i<=1000;i++); /*definitely > than minimum required setup time*/
 
-	GPIO_SetValue(1,(1<<28));				/* ETH Reset DISABLE*/
-	GPIO_SetDir(1,(1<<8),0);
+	GPIO_SetValue(1u,(1<<28));				/* ETH Reset DISABLE*/
+	GPIO_SetDir(1u,(1<<8),0);
 
 	for(i=0;i<=1000;i++); /*definitely > than minimum required setup time*/
 
