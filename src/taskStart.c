@@ -1,6 +1,4 @@
 #include "app.h"
-//#include "taskStart.h"
-//#include "taskButton.h"
 /*
 ************************************************************************************************
 *                                          STARTUP TASK
@@ -57,37 +55,35 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                 (OS_ERR     *)&err);
-        
-#if 0
-    OSTaskCreate((OS_TCB     *)&App_TaskButtonTCB,
-                 (CPU_CHAR   *)"Button",
-                 (OS_TASK_PTR )App_TaskButton,
-                 (void       *)0,
-                 (OS_PRIO     )4,
-                 (CPU_STK    *)App_TaskButtonStk,
-                 (CPU_STK_SIZE)0,
-                 (CPU_STK_SIZE)APP_STACK_SIZE,
-                 (OS_MSG_QTY  )0,
-                 (OS_TICK     )0,
-                 (void       *)0,
-                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                 (OS_ERR     *)&err);
+    
+    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskReadTCB,
+                (CPU_CHAR   *)"EthernetRead",
+                (OS_TASK_PTR )EthernetLinkLayer_TaskRead,
+                (void       *)0,
+                (OS_PRIO     )5,
+                (CPU_STK    *)EthernetLinkLayer_TaskReadStk,
+                (CPU_STK_SIZE)0,
+                (CPU_STK_SIZE)APP_STACK_SIZE,
+                (OS_MSG_QTY  )0,
+                (OS_TICK     )0,
+                (void       *)0,
+                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                (OS_ERR     *)&err);
+    
+    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskWriteTCB,
+                (CPU_CHAR   *)"EthernetWrite",
+                (OS_TASK_PTR )EthernetLinkLayer_TaskWrite,
+                (void       *)0,
+                (OS_PRIO     )5,
+                (CPU_STK    *)EthernetLinkLayer_TaskWriteStk,
+                (CPU_STK_SIZE)0,
+                (CPU_STK_SIZE)APP_STACK_SIZE,
+                (OS_MSG_QTY  )0,
+                (OS_TICK     )0,
+                (void       *)0,
+                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                (OS_ERR     *)&err);
 
-    OSTaskCreate((OS_TCB     *)&App_TaskMotorSteuerungTCB,
-                 (CPU_CHAR   *)"MotorSteuerung",
-                 (OS_TASK_PTR )App_TaskMotorSteuerung,
-                 (void       *)0,
-                 (OS_PRIO     )2,
-                 (CPU_STK    *)App_TaskMotorSteuerungStk,
-                 (CPU_STK_SIZE)0,
-                 (CPU_STK_SIZE)APP_STACK_SIZE,
-                 (OS_MSG_QTY  )0,
-                 (OS_TICK     )0,
-                 (void       *)0,
-                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                 (OS_ERR     *)&err);
-
-#endif
     while (DEF_TRUE) {
         OSTimeDlyHMSM(0u, 0u, 10u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
     }

@@ -11,6 +11,7 @@ SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskStart.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
 SRC += $(SOURCEPATH)/taskLed.c
+SRC += $(SOURCEPATH)/ethernetLinkLayer.c
 
 ################################################################################
 #don't edit below
@@ -96,7 +97,7 @@ SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_gpio.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_tmr.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_pinsel.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_gpio.c
-#SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_emac.c
+SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_emac.c
 #SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_uart.c
 #SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/lpc17xx_ssp.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/csp_int.c

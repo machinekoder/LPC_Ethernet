@@ -10,9 +10,9 @@
 #include <includes.h>
 #include <sys/stat.h>
 #include "taskStart.h"
-//#include "taskButton.h"
 #include "taskLed.h"
 #include "taskUsbConnection.h"
+#include "ethernetLinkLayer.h"
 
 /*
 ************************************************************************************************
