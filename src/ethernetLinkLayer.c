@@ -54,9 +54,10 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     {
         OSSemPend(&txSemaphore, (OS_TICK)0u, (OS_OPT)OS_OPT_PEND_BLOCKING, &ts, &err);  // Wait until we want to send something 
         
-        while(EMAC_CheckTransmitIndex() == TRUE)    // if not available wait 1ms
+        if(EMAC_CheckTransmitIndex() == TRUE)    // if not available wait 1ms
         {
-            OSTimeDlyHMSM(0u, 0u, 0u, 1u,OS_OPT_TIME_HMSM_STRICT,&err);
+            EMAC_UpdateTxProduceIndex();
+            //OSTimeDlyHMSM(0u, 0u, 0u, 10u,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         
         EMAC_WritePacketBuffer(&txPacketBuffer);
@@ -73,10 +74,12 @@ int8_t EthernetLinkLayer_sendPacket(uint32_t* data, uint32_t size)
 {
     OS_ERR err;
     
-    if (size > TX_DATA_BUFFER_SIZE)                         // check packet size
-    {
-        return (int8_t)(-1);
-    }
+    //if (size > TX_DATA_BUFFER_SIZE)                         // check packet size
+    //{
+    //    return (int8_t)(-1);
+    //}
+    
+    txPacketBuffer.ulDataLen = size;
     
     memcpy((void*)txDataBuffer, (void*)data, size);         // copy data to internal buffer
     OSSemPost(&txSemaphore, (OS_OPT)OS_OPT_POST_ALL,&err);  // post semaphore

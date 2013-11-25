@@ -927,8 +927,6 @@ void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 			*dp++ = *sp++;
 		}
 	}
-
-
 }
 
 /*********************************************************************//**
