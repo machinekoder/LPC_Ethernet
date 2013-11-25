@@ -9,12 +9,10 @@
 #include <defines.h>
 #include <includes.h>
 #include <sys/stat.h>
-//#include <zentoolworksDriver.h>
 #include "taskStart.h"
 //#include "taskButton.h"
-//#include "taskLed.h"
-//#include "taskMotorSteuerung.h"
-//#include "taskUsbConnection.h"
+#include "taskLed.h"
+#include "taskUsbConnection.h"
 
 /*
 ************************************************************************************************

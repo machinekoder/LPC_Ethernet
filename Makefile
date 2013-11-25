@@ -9,18 +9,15 @@ SCRIPTPATH = buildscripts
 # Sytem files
 SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskStart.c
-#SRC += $(SOURCEPATH)/taskLed.c
-#SRC += $(SOURCEPATH)/taskButton.c
-#SRC += $(SOURCEPATH)/taskUsbConnection.c
-#SRC += $(SOURCEPATH)/taskMotorSteuerung.c
-#SRC += $(SOURCEPATH)/control.c
+SRC += $(SOURCEPATH)/taskUsbConnection.c
+SRC += $(SOURCEPATH)/taskLed.c
 
 ################################################################################
 #don't edit below
 SYSPATH = $(SOURCEPATH)/Libraries/SYS
-LIBRARYPATH = $(SOURCEPATH)/Libraries/ComplexCortex/lib
+LIBRARYPATH = $(SOURCEPATH)/Libraries/ComplexCortex/src/lib
 DRVPATH = $(SOURCEPATH)/Libraries/ComplexCortex/driver/LPC17xx
-FORMATPATH = $(SOURCEPATH)/Libraries/ComplexCortex/format
+XPRINTFPATH = $(SOURCEPATH)/Libraries/ComplexCortex/src/xprintf
 
 BUILDPATH = build/
 
@@ -41,8 +38,7 @@ INCPATH += -I"$(LIBRARYPATH)"
 INCPATH += -I"$(SYSPATH)"
 INCPATH += -I"$(SOURCEPATH)"
 INCPATH += -I"$(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/inc"
-INCPATH += -I"$(FORMATPATH)"
-INCPATH += -I"$(FORMATPATH)/lib"
+INCPATH += -I"$(SOURCEPATH)/Libraries/ComplexCortex/include"
 
 ASRC += $(SOURCEPATH)/Libraries/CM3/src/startup_LPC17xx.asm
 ASRC += $(SOURCEPATH)/Libraries/uC-CPU/cpu_a.asm
@@ -136,12 +132,8 @@ SSRC += $(LIBRARYPATH)/button.c
 #SSRC += $(LIBRARYPATH)/ssp.c
 #SSRC += $(LIBRARYPATH)/rfm12.c
 SSRC += $(LIBRARYPATH)/debug.c
+SSRC += $(XPRINTFPATH)/xprintf.c
 
-SSRC += $(FORMATPATH)/format.c
-#SSRC += $(FORMATPATH)/format_fp.c
-SSRC += $(FORMATPATH)/lib/sprintf.c
-SSRC += $(FORMATPATH)/lib/snprintf.c
-SSRC += $(FORMATPATH)/lib/printf.c
 
 LDFILE = LPC1758.ld
 LDPATH = Linker

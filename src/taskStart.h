@@ -1,7 +1,7 @@
 #pragma once
 #include "app.h"
-//#include "taskLed.h"
-//#include "taskUsbConnection.h"
+#include "taskLed.h"
+#include "taskUsbConnection.h"
 //#include "taskMotorSteuerung.h"
 
 static OS_TCB App_TaskStartTCB;               /* Application Startup Task Control Block (TCB) */
