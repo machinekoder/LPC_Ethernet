@@ -1,6 +1,5 @@
 #pragma once
 #include "app.h"
-#include <led.h>
 
 #define APP_LED_STACK_SIZE 50u
 
