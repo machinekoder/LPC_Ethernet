@@ -7,11 +7,11 @@
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
-#define CNC_QUEUE_BUFFER_SIZE 10u
+//#define CNC_QUEUE_BUFFER_SIZE 10u
 
-const uint32 commandDelay = 15u;
+//const uint32 commandDelay = 15u;
 
-ApplicationState applicationState = ApplicationState_Idle;
+//ApplicationState applicationState = ApplicationState_Idle;
 
 /*
 ************************************************************************************************
@@ -19,8 +19,10 @@ ApplicationState applicationState = ApplicationState_Idle;
 ************************************************************************************************
 */
 
-QueueItem cncQueueBufferData[CNC_QUEUE_BUFFER_SIZE];
-CircularBuffer cncQueueBuffer;
+EMAC_CFG_Type emacConfigStruct;
+
+//QueueItem cncQueueBufferData[CNC_QUEUE_BUFFER_SIZE];
+//CircularBuffer cncQueueBuffer;
 
 // For testing
 int8 testValue = 2;
@@ -99,7 +101,13 @@ int main (void)
     CSP_TmrCfg (CSP_TMR_NBR_01,TIMER_FREQ);
     CSP_TmrCfg (CSP_TMR_NBR_02,TIMER_FREQ);
 #endif
-    
+
+    EMAC_PinCfg();
+    OS_EMAC_Init(EthernetLinkLayer_rxSemaphore());
+    emacConfigStruct.Mode = EMAC_MODE_100M_FULL;
+    emacConfigStruct.pbEMAC_Addr = EthernetLinkLayer_macAddress();
+
+
     USBInit();                                               /* USB Initialization */
     /* register descriptors */
     USBRegisterDescriptors(abDescriptors);                   /* USB Descriptor Initialization */
