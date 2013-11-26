@@ -181,20 +181,20 @@ static void rx_descr_init (void)
 	/* Initialize Receive Descriptor and Status array. */
 	uint32_t i;
 
-	for (i = 0; i < EMAC_NUM_RX_FRAG; i++) {
+	for (i = 0u; i < EMAC_NUM_RX_FRAG; i++) {
 		Rx_Desc[i].Packet  = (uint32_t)&eth_rx_buf[i];
-		Rx_Desc[i].Ctrl    = EMAC_RCTRL_INT | (EMAC_ETH_MAX_FLEN - 1);
-		Rx_Stat[i].Info    = 0;
-		Rx_Stat[i].HashCRC = 0;
+		Rx_Desc[i].Ctrl    = EMAC_RCTRL_INT | (EMAC_ETH_MAX_FLEN - 1u);
+		Rx_Stat[i].Info    = 0u;
+		Rx_Stat[i].HashCRC = 0u;
 	}
 
 	/* Set EMAC Receive Descriptor Registers. */
 	LPC_EMAC->RxDescriptor       = (uint32_t)&Rx_Desc[0];
 	LPC_EMAC->RxStatus           = (uint32_t)&Rx_Stat[0];
-	LPC_EMAC->RxDescriptorNumber = EMAC_NUM_RX_FRAG - 1;
+	LPC_EMAC->RxDescriptorNumber = EMAC_NUM_RX_FRAG - 1u;
 
 	/* Rx Descriptors Point to 0 */
-	LPC_EMAC->RxConsumeIndex  = 0;
+	LPC_EMAC->RxConsumeIndex  = 0u;
 }
 
 
@@ -898,10 +898,10 @@ void EMAC_WritePacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 	sp  = (uint32_t *)pDataStruct->pbDataBuf;
 	dp  = (uint32_t *)Tx_Desc[idx].Packet;
 	/* Copy frame data to EMAC packet buffers. */
-	for (len = (pDataStruct->ulDataLen + 3) >> 2; len; len--) {
+	for (len = (pDataStruct->ulDataLen + 3u) >> 2; len; len--) {
 		*dp++ = *sp++;
 	}
-	Tx_Desc[idx].Ctrl = (pDataStruct->ulDataLen - 1) | (EMAC_TCTRL_INT | EMAC_TCTRL_LAST);
+	Tx_Desc[idx].Ctrl = (pDataStruct->ulDataLen - 1u) | (EMAC_TCTRL_INT | EMAC_TCTRL_LAST);
 }
 
 /*********************************************************************//**
@@ -923,7 +923,7 @@ void EMAC_ReadPacketBuffer(EMAC_PACKETBUF_Type *pDataStruct)
 	sp = (uint32_t *)Rx_Desc[idx].Packet;//OFFSET BUG?
 
 	if (pDataStruct->pbDataBuf != NULL) {
-		for (len = (pDataStruct->ulDataLen + 3) >> 2; len; len--) {
+		for (len = (pDataStruct->ulDataLen + 3u) >> 2; len; len--) {
 			*dp++ = *sp++;
 		}
 	}

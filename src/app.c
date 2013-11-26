@@ -107,8 +107,8 @@ int main (void)
     EMAC_PinCfg();
     emacConfigStruct.Mode = EMAC_MODE_100M_FULL;
     emacConfigStruct.pbEMAC_Addr = EthernetLinkLayer_macAddress();
-    EMAC_Init(&emacConfigStruct);
     OS_EMAC_Init(EthernetLinkLayer_rxSemaphore());
+    EMAC_Init(&emacConfigStruct);
     
     CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (CSP_DEV_NBR   )CSP_INT_SRC_NBR_ETHER_00,
