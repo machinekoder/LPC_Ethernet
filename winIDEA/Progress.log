@@ -1,4 +1,3 @@
-INITIALIZING	Emulator: iSystem iTAG (SN 1010313)   Debugger: On-chip
-LOADING	Z:\home\alexander\projects\cnc-machine\embedded\bin\firmware.elf
+LOADING	Z:\home\alexander\projects\LPC_Ethernet\bin\firmware.elf
 EMULATION	POD: Cortex   CPU: NXP LPC17xx
 DEBUG	PROTOCOL: JTAG; RESET: SoC

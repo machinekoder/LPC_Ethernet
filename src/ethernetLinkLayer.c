@@ -2,20 +2,20 @@
 #include <os.h>
 #include <lpc17xx_emac.h>
 
-#define RX_DATA_BUFFER_SIZE 256u
-#define TX_DATA_BUFFER_SIZE 256u
+#define RX_DATA_BUFFER_SIZE 1542u   // 1542 bytes is biggest ethernet frame
+#define TX_DATA_BUFFER_SIZE 1542u
 
 uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};
 
 OS_SEM rxSemaphore;
-uint32_t rxDataBuffer[RX_DATA_BUFFER_SIZE];
+uint8_t rxDataBuffer[RX_DATA_BUFFER_SIZE];
 EMAC_PACKETBUF_Type rxPacketBuffer;
 
 OS_SEM txSemaphore;
-uint32_t txDataBuffer[TX_DATA_BUFFER_SIZE];
+uint8_t txDataBuffer[TX_DATA_BUFFER_SIZE];
 EMAC_PACKETBUF_Type txPacketBuffer;
 
-void EthernetLinkLayer_processRxData(uint32_t size);
+void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size);
 
 void EthernetLinkLayer_TaskRead(void* p_arg)
 {
@@ -23,7 +23,7 @@ void EthernetLinkLayer_TaskRead(void* p_arg)
     CPU_TS  ts;
     
     // init rx buffer
-    rxPacketBuffer.pbDataBuf = rxDataBuffer;
+    rxPacketBuffer.pbDataBuf = (uint32_t*)rxDataBuffer;
     rxPacketBuffer.ulDataLen = RX_DATA_BUFFER_SIZE;
     
     while (DEF_TRUE)
@@ -31,7 +31,7 @@ void EthernetLinkLayer_TaskRead(void* p_arg)
         OSSemPend(&rxSemaphore, (OS_TICK)0u, (OS_OPT)OS_OPT_PEND_BLOCKING, &ts, &err);  // Wait until we receive something 
         
         EMAC_ReadPacketBuffer(&rxPacketBuffer);
-        EthernetLinkLayer_processRxData(EMAC_GetReceiveDataSize());
+        EthernetLinkLayer_processRxData((uint8_t*)(rxPacketBuffer.pbDataBuf), EMAC_GetReceiveDataSize());
         if (EMAC_CheckReceiveIndex() == TRUE)
         {
             EMAC_UpdateRxConsumeIndex();
@@ -45,7 +45,7 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     CPU_TS  ts;
     
     // init tx buffer
-    txPacketBuffer.pbDataBuf = txDataBuffer;
+    txPacketBuffer.pbDataBuf = (uint32_t*)txDataBuffer;
     txPacketBuffer.ulDataLen = TX_DATA_BUFFER_SIZE;
     
     OSSemCreate(&txSemaphore, "TX_SEM", (OS_SEM_CTR)0u, &err);
@@ -64,13 +64,23 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     }
 }
 
-void EthernetLinkLayer_processRxData(uint32_t size)
+void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
 {
-    EthernetLinkLayer_sendPacket(rxDataBuffer, size);
+    EthernetFrameHeader *ethernetFrameHeader;
+    uint8_t             *payload;
     
+    ethernetFrameHeader = (EthernetFrameHeader*)data;   // the frame header
+    payload             = &data[22];                    // payload should always start at position 22
+    
+    if ((ethernetFrameHeader->etherType[0] == 0x88u)
+        && (ethernetFrameHeader->etherType[1] == 0x66u))
+    {
+        
+        EthernetLinkLayer_sendPacket(data, size);
+    }
 }
 
-int8_t EthernetLinkLayer_sendPacket(uint32_t* data, uint32_t size)
+int8_t EthernetLinkLayer_sendPacket(uint8_t* data, uint32_t size)
 {
     OS_ERR err;
     

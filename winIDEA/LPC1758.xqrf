@@ -138,173 +138,47 @@
           <LinkGroup.2>
             <LinkGroupName type="String">App</LinkGroupName>
             <File.0>
-              <FileName type="String">$(IRFDIR)src\taskStart.c</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\app.c</FileName>
               <FileOptios>
                 <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
               </FileOptios>
             </File.0>
             <File.1>
-              <FileName type="String">$(IRFDIR)src\app.c</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\ethernetLinkLayer.c</FileName>
               <FileOptios>
                 <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
               </FileOptios>
             </File.1>
             <File.2>
-              <FileName type="String">$(IRFDIR)src\taskMachine.c</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\taskButton.c</FileName>
               <FileOptios>
                 <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
               </FileOptios>
             </File.2>
             <File.3>
-              <FileName type="String">$(IRFDIR)src\taskStart.h</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\taskLed.c</FileName>
+              <FileOptios>
+                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
+              </FileOptios>
             </File.3>
             <File.4>
-              <FileName type="String">$(IRFDIR)src\app.h</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\taskStart.c</FileName>
+              <FileOptios>
+                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
+              </FileOptios>
             </File.4>
             <File.5>
-              <FileName type="String">$(IRFDIR)src\taskMachine.h</FileName>
+              <FileName type="String">$(IRFDIR)..\..\LPC_Ethernet\src\taskUsbConnection.c</FileName>
+              <FileOptios>
+                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
+              </FileOptios>
             </File.5>
-            <File.6>
-              <FileName type="String">$(IRFDIR)src\taskSupervisor.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.6>
-            <File.7>
-              <FileName type="String">$(IRFDIR)src\taskSupervisor.h</FileName>
-            </File.7>
-            <File.8>
-              <FileName type="String">$(IRFDIR)src\taskMotorSteuerung.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.8>
-            <File.9>
-              <FileName type="String">$(IRFDIR)src\taskUsbConnection.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.9>
           </LinkGroup.2>
           <LinkGroup.3>
             <LinkGroupName type="String">Config</LinkGroupName>
           </LinkGroup.3>
           <LinkGroup.4>
             <LinkGroupName type="String">lib</LinkGroupName>
-            <File.0>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\button.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.0>
-            <File.1>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\adc.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.1>
-            <File.10>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\rfm12.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.10>
-            <File.11>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\spi.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.11>
-            <File.12>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\ssp.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.12>
-            <File.13>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\timeout.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.13>
-            <File.14>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\timer.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.14>
-            <File.15>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\uart.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.15>
-            <File.16>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\wifly.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.16>
-            <File.17>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\debug.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.17>
-            <File.18>
-              <FileName type="String">$(IRFDIR)src\Libraries\uC-CSP\LPC17xx\USB\src\usblibs.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.18>
-            <File.2>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\circularbuffer.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.2>
-            <File.3>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\crc.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.3>
-            <File.4>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\dac.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.4>
-            <File.5>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\gpio.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.5>
-            <File.6>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\iap.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.6>
-            <File.7>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\led.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.7>
-            <File.8>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\pincon.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.8>
-            <File.9>
-              <FileName type="String">$(IRFDIR)src\Libraries\Library\src\pwm.c</FileName>
-              <FileOptios>
-                <CompilerOptions type="String">-g3 -x c -Wall -Wimplicit -mcpu=cortex-m3 -mthumb $(DEFINES)  $(INCLUDES)   -c -o $(OUTPUTDIR)$(NOEXT).o $(EDNAME)</CompilerOptions>
-              </FileOptios>
-            </File.9>
           </LinkGroup.4>
           <TargetOptios>
             <AsmArgFile type="String"></AsmArgFile>
