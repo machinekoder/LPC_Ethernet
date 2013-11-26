@@ -1,6 +1,8 @@
 #pragma once
 #include "app.h"
 
+#define ETHERNET_FRAME_HEADER_SIZE 14u
+
 typedef struct {
     //uint8_t preamble[7];
     //uint8_t startOfFrame[1];
