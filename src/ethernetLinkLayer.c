@@ -57,7 +57,6 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
         if(EMAC_CheckTransmitIndex() == TRUE)    // if not available wait 1ms
         {
             EMAC_UpdateTxProduceIndex();
-            //OSTimeDlyHMSM(0u, 0u, 0u, 10u,OS_OPT_TIME_HMSM_STRICT,&err);
         }
         
         EMAC_WritePacketBuffer(&txPacketBuffer);
@@ -68,42 +67,52 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
 {
     EthernetFrameHeader *ethernetFrameHeader;
     uint8_t             *payload;
+    uint32_t            payloadSize;
     
     ethernetFrameHeader = (EthernetFrameHeader*)data;   // the frame header
     payload             = &data[ETHERNET_FRAME_HEADER_SIZE];                    // payload should always start at position 22
+    payloadSize         = size - ETHERNET_FRAME_HEADER_SIZE;
     
     if ((ethernetFrameHeader->etherType[0] == 0x88u)
         && (ethernetFrameHeader->etherType[1] == 0x66u))
     {
-        uint8_t sourceMacAddress[6];
-        uint8_t destinationMacAddress[6];
         uint8_t response[3] = { 'A', 'C', 'K' };
         uint32_t responseSize = 3u;
         
-        memcpy((void*)sourceMacAddress, (void*)(ethernetFrameHeader->macSource), 6u);
-        memcpy((void*)destinationMacAddress, (void*)(ethernetFrameHeader->macDestination), 6u);
-        
-        memcpy((void*)(ethernetFrameHeader->macSource), (void*)destinationMacAddress, 6u);
-        memcpy((void*)(ethernetFrameHeader->macDestination), (void*)sourceMacAddress, 6u);
-        
-        memcpy((void*)payload, (void*)response, 3u);
-        
-        EthernetLinkLayer_sendPacket(data, ETHERNET_FRAME_HEADER_SIZE + responseSize);
+        EthernetLinkLayer_sendPacket(ethernetFrameHeader->macDestination,
+                                     ethernetFrameHeader->macSource,
+                                     ethernetFrameHeader->etherType,
+                                     response,
+                                     responseSize);
+    }
+    else
+    {
+        // ignore packet
     }
 }
 
-int8_t EthernetLinkLayer_sendPacket(uint8_t* data, uint32_t size)
+int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource, 
+                                    uint8_t* macDestination, 
+                                    uint8_t* type, 
+                                    uint8_t* payload, 
+                                    uint32_t payloadSize)
 {
     OS_ERR err;
     
-    //if (size > TX_DATA_BUFFER_SIZE)                         // check packet size
-    //{
-    //    return (int8_t)(-1);
-    //}
+    EthernetFrameHeader *ethernetFrameHeader;
+    uint8_t             *destinationPayload;
     
-    txPacketBuffer.ulDataLen = size;
+    ethernetFrameHeader = (EthernetFrameHeader*)txDataBuffer;
+    destinationPayload = (uint8_t*)&((uint8_t*)txDataBuffer)[ETHERNET_FRAME_HEADER_SIZE];
     
-    memcpy((void*)txDataBuffer, (void*)data, size);         // copy data to internal buffer
+    memcpy((void*)(ethernetFrameHeader->macSource), (void*)macSource, 6u);
+    memcpy((void*)(ethernetFrameHeader->macDestination), (void*)macDestination, 6u);
+    memcpy((void*)(ethernetFrameHeader->etherType), (void*)type, 2u);
+    memcpy((void*)destinationPayload, (void*)payload, payloadSize);
+    
+    txPacketBuffer.ulDataLen = ETHERNET_FRAME_HEADER_SIZE + payloadSize;
+    
+    memcpy((void*)txDataBuffer, (void*)payload, payloadSize);         // copy data to internal buffer
     OSSemPost(&txSemaphore, (OS_OPT)OS_OPT_POST_ALL,&err);  // post semaphore
     
     if (err != OS_ERR_NONE)                                 // check for errors
