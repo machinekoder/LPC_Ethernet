@@ -79,6 +79,7 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
         uint8_t response[3] = { 'A', 'C', 'K' };
         uint32_t responseSize = 3u;
         
+        // Send and simple ACK response, switch destination and source address
         EthernetLinkLayer_sendPacket(ethernetFrameHeader->macDestination,
                                      ethernetFrameHeader->macSource,
                                      ethernetFrameHeader->etherType,
@@ -112,7 +113,6 @@ int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource,
     
     txPacketBuffer.ulDataLen = ETHERNET_FRAME_HEADER_SIZE + payloadSize;
     
-    memcpy((void*)txDataBuffer, (void*)payload, payloadSize);         // copy data to internal buffer
     OSSemPost(&txSemaphore, (OS_OPT)OS_OPT_POST_ALL,&err);  // post semaphore
     
     if (err != OS_ERR_NONE)                                 // check for errors
