@@ -70,7 +70,7 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
     uint8_t             *payload;
     
     ethernetFrameHeader = (EthernetFrameHeader*)data;   // the frame header
-    payload             = &data[16];                    // payload should always start at position 22
+    payload             = &data[22];                    // payload should always start at position 22
     
     if ((ethernetFrameHeader->etherType[0] == 0x88u)
         && (ethernetFrameHeader->etherType[1] == 0x66u))
