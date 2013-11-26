@@ -2,12 +2,12 @@
 #include "app.h"
 
 typedef struct {
-    uint8_t preamble[7];
-    uint8_t startOfFrame[1];
+    //uint8_t preamble[7];
+    //uint8_t startOfFrame[1];
     uint8_t macDestination[6];
     uint8_t macSource[6];
     uint8_t etherType[2];
-} EthernetFrameHeader;  // !will be extended to 24byte
+} EthernetFrameHeader;  // !will be extended to 16byte
 
 static OS_TCB EthernetLinkLayer_TaskReadTCB;
 static CPU_STK EthernetLinkLayer_TaskReadStk[APP_STACK_SIZE];
