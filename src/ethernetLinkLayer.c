@@ -75,8 +75,20 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
     if ((ethernetFrameHeader->etherType[0] == 0x88u)
         && (ethernetFrameHeader->etherType[1] == 0x66u))
     {
+        uint8_t sourceMacAddress[6];
+        uint8_t destinationMacAddress[6];
+        uint8_t response[3] = { 'A', 'C', 'K' };
+        uint32_t responseSize = 3u;
         
-        EthernetLinkLayer_sendPacket(data, size);
+        memcpy((void*)sourceMacAddress, (void*)(ethernetFrameHeader->macSource), 6u);
+        memcpy((void*)destinationMacAddress, (void*)(ethernetFrameHeader->macDestination), 6u);
+        
+        memcpy((void*)(ethernetFrameHeader->macSource), (void*)destinationMacAddress, 6u);
+        memcpy((void*)(ethernetFrameHeader->macDestination), (void*)sourceMacAddress, 6u);
+        
+        memcpy((void*)payload, (void*)response, 3u);
+        
+        EthernetLinkLayer_sendPacket(data, 22u + responseSize);
     }
 }
 
