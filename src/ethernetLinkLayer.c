@@ -1,19 +1,21 @@
 #include "ethernetLinkLayer.h"
+#include "arp.h"
 #include <os.h>
 #include <lpc17xx_emac.h>
+
 
 #define RX_DATA_BUFFER_SIZE 1542u   // 1542 bytes is biggest ethernet frame
 #define TX_DATA_BUFFER_SIZE 1542u
 
-uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};
+static uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};   // default mac address
 
-OS_SEM rxSemaphore;
-uint8_t rxDataBuffer[RX_DATA_BUFFER_SIZE];
-EMAC_PACKETBUF_Type rxPacketBuffer;
+static OS_SEM rxSemaphore;
+static uint8_t rxDataBuffer[RX_DATA_BUFFER_SIZE];
+static EMAC_PACKETBUF_Type rxPacketBuffer;
 
-OS_SEM txSemaphore;
-uint8_t txDataBuffer[TX_DATA_BUFFER_SIZE];
-EMAC_PACKETBUF_Type txPacketBuffer;
+static OS_SEM txSemaphore;
+static uint8_t txDataBuffer[TX_DATA_BUFFER_SIZE];
+static EMAC_PACKETBUF_Type txPacketBuffer;
 
 void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size);
 
@@ -86,6 +88,11 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
                                      response,
                                      responseSize);
     }
+    else if ((ethernetFrameHeader->etherType[0] == 0x80u)   // ARP protocol request
+        && (ethernetFrameHeader->etherType[1] == 0x60u))
+    {
+        Arp_processRequest(ethernetFrameHeader->macSource, payload);
+    }
     else
     {
         // ignore packet
@@ -130,12 +137,7 @@ uint8_t* EthernetLinkLayer_macAddress(void)
 
 void EthernetLinkLayer_setMacAddress(uint8_t* address)
 {
-    uint8_t i;
-    
-    for (i = 0u; i < 6u; i++)
-    {
-        macAddress[i] = address[i];
-    }
+    memcpy((void*)macAddress, (void*)address, 6u);
 }
 
 OS_SEM* EthernetLinkLayer_rxSemaphore(void)

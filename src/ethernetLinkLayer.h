@@ -4,8 +4,6 @@
 #define ETHERNET_FRAME_HEADER_SIZE 14u
 
 typedef struct {
-    //uint8_t preamble[7];
-    //uint8_t startOfFrame[1];
     uint8_t macDestination[6];
     uint8_t macSource[6];
     uint8_t etherType[2];
@@ -21,6 +19,7 @@ void EthernetLinkLayer_TaskRead (void *p_arg);
 void EthernetLinkLayer_TaskWrite (void *p_arg);
 
 uint8_t*    EthernetLinkLayer_macAddress(void);
+void        EthernetLinkLayer_setMacAddress(uint8_t* address);
 void        EthernetLinkLayer_setMacAddress(uint8_t *address);
 OS_SEM*     EthernetLinkLayer_rxSemaphore(void);
 

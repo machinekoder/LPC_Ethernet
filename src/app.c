@@ -23,14 +23,7 @@
 
 EMAC_CFG_Type emacConfigStruct;
 
-//QueueItem cncQueueBufferData[CNC_QUEUE_BUFFER_SIZE];
-//CircularBuffer cncQueueBuffer;
-
-// For testing
-int8 testValue = 2;
-uint8 testPort = 2;
-uint8 testPin = 2;
-bool testing = FALSE;
+uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u}; 
 
 /*
 ************************************************************************************************
@@ -104,6 +97,7 @@ int main (void)
     CSP_TmrCfg (CSP_TMR_NBR_02,TIMER_FREQ);
 #endif
 
+    // Init the Ethernet PHY
     EMAC_PinCfg();
     emacConfigStruct.Mode = EMAC_MODE_100M_FULL;
     emacConfigStruct.pbEMAC_Addr = EthernetLinkLayer_macAddress();
@@ -116,11 +110,14 @@ int main (void)
     EMAC_SetFilterMode(EMAC_RFC_MAGP_WOL_EN, DISABLE);
     EMAC_SetFilterMode(EMAC_RFC_PFILT_WOL_EN, DISABLE);
     
+    // Init the Ethernt interrupt vecotrs
     CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
                    (CSP_DEV_NBR   )CSP_INT_SRC_NBR_ETHER_00,
                    (CPU_FNCT_PTR  )CSP_IntETH_Handler,
                    (void         *)0);
     CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_ETHER_00);
+    
+    EthernetLinkLayer_setMacAddress(macAddress);
 
 #if 0
     USBInit();                                               /* USB Initialization */

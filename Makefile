@@ -12,6 +12,7 @@ SRC += $(SOURCEPATH)/taskStart.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
 SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/ethernetLinkLayer.c
+SRC += $(SOURCEPATH)/arp.c
 
 ################################################################################
 #don't edit below
