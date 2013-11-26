@@ -343,7 +343,7 @@ int OS_EMAC_Init(OS_SEM *rx_sem) {
 
 	OS_ERR os_err;
 
-	OSSemCreate(rx_sem, "RX_SEM", 0, &os_err);
+	OSSemCreate(rx_sem, "RX_SEM", 0u, &os_err);
 
 	if(os_err != OS_ERR_NONE)
 		return -1;
@@ -351,8 +351,8 @@ int OS_EMAC_Init(OS_SEM *rx_sem) {
 	__ETH_RX_SEM = rx_sem;
 
 	/*setup emac dma buffers*/
-	eth_tx_buf = (uint32_t *)0x2007C000;
-	eth_rx_buf = (uint32_t *)(0x2007C000+( (EMAC_ETH_MAX_FLEN>>2)*EMAC_NUM_TX_FRAG ));
+	eth_tx_buf = (uint32_t *)0x2007C000u;
+	eth_rx_buf = (uint32_t *)(0x2007C000u+( (EMAC_ETH_MAX_FLEN>>2)*EMAC_NUM_TX_FRAG ));
 
 	return 0;
 
