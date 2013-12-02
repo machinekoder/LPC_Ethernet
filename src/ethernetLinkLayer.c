@@ -2,20 +2,29 @@
 #include "arp.h"
 #include <os.h>
 #include <lpc17xx_emac.h>
+#include <../ComplexCortex/driver/LPC13xx/types.h>
 
 
-#define RX_DATA_BUFFER_SIZE 1542u   // 1542 bytes is biggest ethernet frame
-#define TX_DATA_BUFFER_SIZE 1542u
+#define RX_DATA_BUFFER_SIZE  1542u   // 1542 bytes is biggest ethernet frame
+#define RX_DATA_BUFFER_COUNT 7u
+#define TX_DATA_BUFFER_SIZE  1542u
+#define TX_DATA_BUFFER_COUNT 3u
 
 static uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};   // default mac address
 
 static OS_SEM rxSemaphore;
-static uint8_t rxDataBuffer[RX_DATA_BUFFER_SIZE];
 static EMAC_PACKETBUF_Type rxPacketBuffer;
 
-static OS_SEM txSemaphore;
-static uint8_t txDataBuffer[TX_DATA_BUFFER_SIZE];
 static EMAC_PACKETBUF_Type txPacketBuffer;
+
+static const uint32_t __attribute__ ((aligned (4))) *ethernetRxBufferData = (uint32_t*)0x20080000u;
+static const uint32_t __attribute__ ((aligned (4))) *ethernetTxBufferData = (uint32_t*)(0x20080000u + 2700u);
+
+static OS_MEM ethernetRxBuffer;
+static OS_MEM ethernetTxBuffer;
+
+static OS_Q   ethernetRxQueue;
+static OS_Q   ethernetTxQueue;
 
 void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size);
 
@@ -23,20 +32,47 @@ void EthernetLinkLayer_TaskRead(void* p_arg)
 {
     OS_ERR  err;
     CPU_TS  ts;
+    uint8_t* rxDataBuffer;
     
     // init rx buffer
-    rxPacketBuffer.pbDataBuf = (uint32_t*)rxDataBuffer;
+    OSMemCreate((OS_MEM     *) &ethernetRxBuffer,
+                (CPU_CHAR   *) "EthernetRxBuffer",
+                (void       *) &ethernetRxBufferData,
+                (OS_MEM_QTY  ) RX_DATA_BUFFER_COUNT,
+                (OS_MEM_SIZE ) RX_DATA_BUFFER_SIZE,
+                (OS_ERR     *) &err);
+    
+    OSQCreate((OS_Q     *) &ethernetRxQueue,
+              (CPU_CHAR *) "EthernetRxQueue",
+              (OS_MSG_QTY) RX_DATA_BUFFER_COUNT,
+              (OS_ERR   *) &err);
+    
+    //rxPacketBuffer.pbDataBuf = (uint32_t*)rxDataBuffer;
     rxPacketBuffer.ulDataLen = RX_DATA_BUFFER_SIZE;
     
     while (DEF_TRUE)
     {
         OSSemPend(&rxSemaphore, (OS_TICK)0u, (OS_OPT)OS_OPT_PEND_BLOCKING, &ts, &err);  // Wait until we receive something 
         
-        EMAC_ReadPacketBuffer(&rxPacketBuffer);
-        EthernetLinkLayer_processRxData((uint8_t*)(rxPacketBuffer.pbDataBuf), EMAC_GetReceiveDataSize());
-        if (EMAC_CheckReceiveIndex() == TRUE)
+        rxDataBuffer = OSMemGet((OS_MEM    *) &ethernetRxBuffer,
+                                (OS_ERR    *) &err);
+        
+        if (err == OS_ERR_NONE)
         {
-            EMAC_UpdateRxConsumeIndex();
+            rxPacketBuffer.pbDataBuf = (uint32_t*)rxDataBuffer;
+            
+            EMAC_ReadPacketBuffer(&rxPacketBuffer);
+            
+            OSQPost((OS_Q   *) &ethernetRxQueue,
+                    (void   *) rxDataBuffer,
+                    (OS_MSG_SIZE) EMAC_GetReceiveDataSize(),
+                    (OS_OPT  ) OS_OPT_POST_FIFO,
+                    (OS_ERR *) &err);
+            
+            if (EMAC_CheckReceiveIndex() == TRUE)
+            {
+                EMAC_UpdateRxConsumeIndex();
+            }
         }
     }
 }
@@ -45,23 +81,44 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
 {
     OS_ERR  err;
     CPU_TS  ts;
+    void *txDataBuffer;
+    OS_MSG_SIZE msgSize;
+    
+    OSQCreate((OS_Q     *) &ethernetTxQueue,
+              (CPU_CHAR *) "EthernetTxQueue",
+              (OS_MSG_QTY) TX_DATA_BUFFER_COUNT,
+              (OS_ERR   *) &err);
     
     // init tx buffer
-    txPacketBuffer.pbDataBuf = (uint32_t*)txDataBuffer;
+    OSMemCreate((OS_MEM     *) &ethernetTxBuffer,
+                (CPU_CHAR   *) "EthernetTxBuffer",
+                (void       *) &ethernetTxBufferData,
+                (OS_MEM_QTY  ) TX_DATA_BUFFER_COUNT,
+                (OS_MEM_SIZE ) TX_DATA_BUFFER_SIZE,
+                (OS_ERR     *) &err);
     txPacketBuffer.ulDataLen = TX_DATA_BUFFER_SIZE;
-    
-    OSSemCreate(&txSemaphore, "TX_SEM", (OS_SEM_CTR)0u, &err);
     
     while (DEF_TRUE)
     {
-        OSSemPend(&txSemaphore, (OS_TICK)0u, (OS_OPT)OS_OPT_PEND_BLOCKING, &ts, &err);  // Wait until we want to send something 
+        txDataBuffer = OSQPend((OS_Q   *) &ethernetRxQueue,
+                                (OS_TICK ) 0u,
+                                (OS_OPT  ) OS_OPT_PEND_BLOCKING,
+                                (OS_MSG_SIZE *) &msgSize,
+                                (CPU_TS *) &ts,
+                                (OS_ERR *) &err);
         
+        txPacketBuffer.pbDataBuf = (uint32_t*)txDataBuffer;
+              
         if(EMAC_CheckTransmitIndex() == TRUE)    // if not available wait 1ms
         {
             EMAC_UpdateTxProduceIndex();
         }
         
         EMAC_WritePacketBuffer(&txPacketBuffer);
+        
+        OSMemPut((OS_MEM    *) &ethernetTxBuffer,
+                 (void      *) txDataBuffer,
+                 (OS_ERR    *) &err);
     }
 }
 
@@ -69,7 +126,25 @@ void EthernetLinkLayer_TaskProcess(void* p_arg)
 {
     OS_ERR err;
     CPU_TS ts;
-
+    OS_MSG_SIZE msgSize;
+    void *rxDataBuffer;
+    
+    
+    while (DEF_TRUE)
+    {
+        rxDataBuffer = OSQPend((OS_Q   *) &ethernetRxQueue,
+                                (OS_TICK ) 0u,
+                                (OS_OPT  ) OS_OPT_PEND_BLOCKING,
+                                (OS_MSG_SIZE *) &msgSize,
+                                (CPU_TS *) &ts,
+                                (OS_ERR *) &err);
+                
+        EthernetLinkLayer_processRxData((uint8_t*)(rxDataBuffer), (uint32_t)msgSize);
+    
+        OSMemPut((OS_MEM    *) &ethernetRxBuffer,
+                (void      *) rxDataBuffer,
+                (OS_ERR    *) &err);
+    }
     
 }
 
@@ -114,10 +189,19 @@ int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource,
                                     uint32_t payloadSize)
 {
     OS_ERR err;
+    void* txDataBuffer;
     
     EthernetFrameHeader *ethernetFrameHeader;
     uint8_t             *destinationPayload;
     
+    txDataBuffer = OSMemGet((OS_MEM    *) &ethernetTxBuffer,
+                            (OS_ERR    *) &err);
+        
+    if (err != OS_ERR_NONE)
+    {
+        return (int8_t)(-1);
+    }
+        
     ethernetFrameHeader = (EthernetFrameHeader*)txDataBuffer;
     destinationPayload = (uint8_t*)&((uint8_t*)txDataBuffer)[ETHERNET_FRAME_HEADER_SIZE];
     
@@ -128,13 +212,17 @@ int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource,
     
     txPacketBuffer.ulDataLen = ETHERNET_FRAME_HEADER_SIZE + payloadSize;
     
-    OSSemPost(&txSemaphore, (OS_OPT)OS_OPT_POST_ALL,&err);  // post semaphore
+    OSQPost((OS_Q   *) &ethernetRxQueue,
+            (void   *) txDataBuffer,
+            (OS_MSG_SIZE) EMAC_GetReceiveDataSize(),
+            (OS_OPT  ) OS_OPT_POST_FIFO,
+            (OS_ERR *) &err);
     
     if (err != OS_ERR_NONE)                                 // check for errors
     {
         return(int8_t)(-1);
     }
-    
+
     return (int8_t)0;
 }
 
