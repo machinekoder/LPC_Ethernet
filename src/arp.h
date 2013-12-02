@@ -50,6 +50,11 @@ void Arp_createRequest(uint8_t* ipAddress);
  */
 int8_t Arp_getIpAddress(uint8_t *macAddress, uint8_t *ipAddress);
 
+/** Sets the local IP address
+ *  @param ipAddress the IP address to set
+ */
+void Arp_setLocalIpAddress(uint8_t *ipAddress);
+
 /** 1 minute tick for cleaning up the arp tables
  */
 void Arp_timeTick1m(void);

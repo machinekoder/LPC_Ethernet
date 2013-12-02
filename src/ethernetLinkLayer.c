@@ -97,8 +97,8 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
                                      response,
                                      responseSize);
     }
-    else if ((ethernetFrameHeader->etherType[0] == 0x80u)   // ARP protocol request
-        && (ethernetFrameHeader->etherType[1] == 0x60u))
+    else if ((ethernetFrameHeader->etherType[0] == 0x08u)   // ARP protocol request
+        && (ethernetFrameHeader->etherType[1] == 0x06u))
     {
         Arp_processRequest(ethernetFrameHeader->macSource, payload);
     }

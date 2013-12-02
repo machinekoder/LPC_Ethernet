@@ -15,6 +15,7 @@ SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/taskButton.c
 SRC += $(SOURCEPATH)/ethernetLinkLayer.c
 SRC += $(SOURCEPATH)/arp.c
+SRC += $(SOURCEPATH)/ip.c
 
 ################################################################################
 # Test files

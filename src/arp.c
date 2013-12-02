@@ -10,15 +10,12 @@ static uint32_t timeTick = 0u;
 static uint8_t localIpAddress[4u] = {10u, 42u, 0u, 10u};
 
 static const uint8_t broadcastMacAddress[6u] = {0x00u,0x00u,0x00u,0x00u,0x00u,0x00u};
-static const uint8_t arpType[2u] = {0x80u, 0x00u};
+static const uint8_t arpType[2u] = {0x08u, 0x06u};
 static const uint8_t hardwareTypeEthernet[2u] = {0x00u, 0x01u};
 static const uint8_t protocolTypeIPv4[2u] = {0x08u, 0x00u};
 static const uint8_t operationCodeRequest[2u] = {0x00u, 0x01u};
 static const uint8_t operationCodeResponse[2u] = {0x00, 0x02u};
 static const uint32_t  arpTableExpirationTime = 20u; // 20min
-
-
-
 
 /* private functions */
 /** Adds an entry or updates an arp table entry
@@ -44,9 +41,9 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
     
     arpPacket = (ArpPacket*)requestData;
     
-    if (memcmp(arpPacket->hardwareType, hardwareTypeEthernet, 2u) == (int)0)  // Ethernet
+    if (memcmp((void*)(arpPacket->hardwareType), (void*)hardwareTypeEthernet, 2u) == (int)0)  // Ethernet
     {
-        if (memcmp(arpPacket->protocolType, protocolTypeIPv4, 2u) == (int)0)  // IPv4
+        if (memcmp((void*)(arpPacket->protocolType), (void*)protocolTypeIPv4, 2u) == (int)0)  // IPv4
         {
             ArpPacketEthernetIPv4 *arpPacketEthernetIPv4;
             arpPacketEthernetIPv4 = (ArpPacketEthernetIPv4*)requestData;
@@ -54,7 +51,7 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
             Arp_addArpTableEntry(arpPacketEthernetIPv4->sourceHardwareAddress,  
                                  arpPacketEthernetIPv4->sourceProtocolAddress); // Update out arp table
             
-            if (memcmp(arpPacket->operationCode, operationCodeRequest, 2u) == (int)2u)
+            if (memcmp((void*)(arpPacket->operationCode), (void*)operationCodeRequest, 2u) == (int)2u)
             {
                 Arp_createResponse(sourceAddress,
                                 arpPacketEthernetIPv4->sourceHardwareAddress,
@@ -119,6 +116,24 @@ void Arp_createResponse(uint8_t* packetSourceAddress,
     }
 }
 
+void Arp_createRequest(uint8_t* ipAddress)
+{
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.hardwareType), (void*)hardwareTypeEthernet, 2u);
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.protocolType), (void*)protocolTypeIPv4, 2u);
+    arpEthernetIPv4ResponsePacket.hardwareAddressLength = 6u;
+    arpEthernetIPv4ResponsePacket.protocolAddressLength = 4u;
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.operationCode), (void*)operationCodeRequest, 2u);
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.sourceHardwareAddress), (void*)EthernetLinkLayer_macAddress(), 6u);
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.sourceProtocolAddress), (void*)localIpAddress, 4u);
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationHardwareAddress), (void*)broadcastMacAddress, 6u);
+    memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationProtocolAddress), (void*)ipAddress, 4u);
+    EthernetLinkLayer_sendPacket(EthernetLinkLayer_macAddress(),
+                                    (uint8_t*)broadcastMacAddress,
+                                    (uint8_t*)arpType,
+                                    (uint8_t*)(&arpEthernetIPv4ResponsePacket),
+                                    28u);   
+}
+
 void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
 {
     uint8_t i;
@@ -174,8 +189,8 @@ void Arp_removeArpTableEntry(uint8_t pos)
     
     for (i = pos; i < arpTablePos; ++i)
     {
-        memcpy(arpTable[i].macAddress, arpTable[i+1u].macAddress, 6u);
-        memcpy(arpTable[i].ipAddress, arpTable[i+1u].ipAddress, 4u);
+        memcpy((void*)(arpTable[i].macAddress), (void*)(arpTable[i+1u].macAddress), 6u);
+        memcpy((void*)(arpTable[i].ipAddress), (void*)(arpTable[i+1u].ipAddress), 4u);
         arpTable[i].expirationTimestamp = arpTable[i+1u].expirationTimestamp;
     }
     
@@ -193,6 +208,11 @@ void Arp_updateArpTable(void)
             Arp_removeArpTableEntry(i);
         }
     }
+}
+
+void Arp_setLocalIpAddress(uint8_t* ipAddress)
+{
+    memcpy((void*)localIpAddress, (void*)ipAddress, 4u);
 }
 
 void Arp_timeTick1m(void)
