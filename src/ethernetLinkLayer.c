@@ -73,7 +73,6 @@ void EthernetLinkLayer_TaskProcess(void* p_arg)
     
 }
 
-
 void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
 {
     EthernetFrameHeader *ethernetFrameHeader;
