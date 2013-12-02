@@ -31,7 +31,25 @@ typedef struct {
     uint32_t expirationTimestamp;
 } ArpTableItem;
 
-/** 
- * 
+/** Processes a arp request
+ *  @param sourceAddress source mac address
+ *  @param requestData arp packet payload
+ *  @return 0 on success, -1 on failure
  */
 int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData);
+
+/** Creates an ARP reqest for the specified IP address
+ *  @param ipAddress IP address to resolve
+ */
+void Arp_createRequest(uint8_t* ipAddress);
+
+/** Resolves an mac address to an IPv4 address based on the arp table
+ *  @param macAddress mac address to resolve
+ *  @param ipAddress  pointer to where the ip address should be stored
+ *  @return 0 if entry was found -1 if not
+ */
+int8_t Arp_getIpAddress(uint8_t *macAddress, uint8_t *ipAddress);
+
+/** 1 minute tick for cleaning up the arp tables
+ */
+void Arp_timeTick1m(void);

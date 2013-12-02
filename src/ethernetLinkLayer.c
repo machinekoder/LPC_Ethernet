@@ -65,6 +65,15 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     }
 }
 
+void EthernetLinkLayer_TaskProcess(void* p_arg)
+{
+    OS_ERR err;
+    CPU_TS ts;
+
+    
+}
+
+
 void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
 {
     EthernetFrameHeader *ethernetFrameHeader;

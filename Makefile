@@ -4,6 +4,7 @@
 SOURCEPATH = src
 BINPATH = bin
 SCRIPTPATH = buildscripts
+TESTPATH = test
 
 ################################################################################
 # Sytem files
@@ -11,8 +12,13 @@ SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskStart.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
 SRC += $(SOURCEPATH)/taskLed.c
+SRC += $(SOURCEPATH)/taskButton.c
 SRC += $(SOURCEPATH)/ethernetLinkLayer.c
 SRC += $(SOURCEPATH)/arp.c
+
+################################################################################
+# Test files
+TSRC += $(SOURCEPATH)/arp.test.c
 
 ################################################################################
 #don't edit below
@@ -263,6 +269,43 @@ $(TARGET).siz: $(TARGET).elf
 	$(SIZE) --format=berkely -x -t $<
 	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~"
 	@echo ""
+
+test_all: start_test run_test end_test
+
+start_test:
+	@echo "--------------------------------------------------------------------"
+	@echo "Starting Test process ..."
+	@echo "--------------------------------------------------------------------"
+	$(MKDIR) $(TESTPATH)
+	$(RM) -R $(TESTPATH)/*
+end_test:
+	@echo "--------------------------------------------------------------------"
+	@echo "End of Test process ..."
+	@echo "--------------------------------------------------------------------"
+
+# Compile: create object files from C source files.
+.IGNORE: %.asm
+$(TESTPATH)/%_test : %.test.c
+	@echo ""
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo "Building file: $(@:%_test=%.test.c)"
+	$(MKDIR) `dirname $@`
+	gcc -fprofile-arcs -ftest-coverage $(INCPATH) -lcunit -o $@ `echo "$(@:%_test=%.test.c)" | sed 's,^[^/]*/,,'`
+	cp $^ `dirname $@`
+	cp $(^:%.test.c=%.c) `dirname $@`
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+	@echo ""
+
+run_test : $(TSRC:%.test.c=$(TESTPATH)/%_test)
+	@echo ""
+	@echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+#	cd `dirname $^`
+	$^
+	mv `basename $(^:%_test=%.test.gcda)` `dirname $^`
+	mv `basename $(^:%_test=%.test.gcno)` `dirname $^`
+	cd `dirname $^` && lcov --capture --directory ./ --output-file coverage.info
+	cd `dirname $^` && genhtml coverage.info --output-directory out
+	xdg-open `dirname $^`/out/index.html
 
 # Calculate only the CRC
 crc:

@@ -1,5 +1,6 @@
 #include "taskStart.h"
 #include "taskLed.h"
+#include "taskButton.h"
 #include "taskUsbConnection.h"
 #include "ethernetLinkLayer.h"
 
@@ -62,7 +63,19 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                 (OS_ERR     *)&err);
-    
+    OSTaskCreate((OS_TCB     *)&App_TaskButtonTCB,
+                (CPU_CHAR   *)"Button",
+                (OS_TASK_PTR )App_TaskButton,
+                (void       *)0,
+                (OS_PRIO     )10,
+                (CPU_STK    *)App_TaskButtonStk,
+                (CPU_STK_SIZE)0,
+                (CPU_STK_SIZE)APP_STACK_SIZE,
+                (OS_MSG_QTY  )0,
+                (OS_TICK     )0,
+                (void       *)0,
+                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                (OS_ERR     *)&err);
     OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskReadTCB,
                 (CPU_CHAR   *)"EthernetRead",
                 (OS_TASK_PTR )EthernetLinkLayer_TaskRead,
@@ -83,6 +96,19 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_PRIO     )5,
                 (CPU_STK    *)EthernetLinkLayer_TaskWriteStk,
+                (CPU_STK_SIZE)0,
+                (CPU_STK_SIZE)APP_STACK_SIZE,
+                (OS_MSG_QTY  )0,
+                (OS_TICK     )0,
+                (void       *)0,
+                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                (OS_ERR     *)&err);
+    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskProcessTCB,
+                (CPU_CHAR   *)"EthernetProcess",
+                (OS_TASK_PTR )EthernetLinkLayer_TaskProcess,
+                (void       *)0,
+                (OS_PRIO     )6,
+                (CPU_STK    *)EthernetLinkLayer_TaskProcessStk,
                 (CPU_STK_SIZE)0,
                 (CPU_STK_SIZE)APP_STACK_SIZE,
                 (OS_MSG_QTY  )0,

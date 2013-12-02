@@ -15,8 +15,12 @@ static CPU_STK EthernetLinkLayer_TaskReadStk[APP_STACK_SIZE];
 static OS_TCB EthernetLinkLayer_TaskWriteTCB;
 static CPU_STK EthernetLinkLayer_TaskWriteStk[APP_STACK_SIZE];
 
+static OS_TCB EthernetLinkLayer_TaskProcessTCB;
+static CPU_STK EthernetLinkLayer_TaskProcessStk[APP_STACK_SIZE];
+
 void EthernetLinkLayer_TaskRead (void *p_arg);
 void EthernetLinkLayer_TaskWrite (void *p_arg);
+void EthernetLinkLayer_TaskProcess(void *p_arg);
 
 uint8_t*    EthernetLinkLayer_macAddress(void);
 void        EthernetLinkLayer_setMacAddress(uint8_t* address);

@@ -4,12 +4,39 @@
 static ArpTableItem arpTable[ARP_TABLE_SIZE];
 static uint8_t      arpTablePos = 0u;
 
+static ArpPacketEthernetIPv4 arpEthernetIPv4ResponsePacket;
+static uint32_t timeTick = 0u;
+
 static uint8_t localIpAddress[4u] = {10u, 42u, 0u, 10u};
-static const uint8_t broadcastMacAddress[6u] = {0x00,0x00,0x00,0x00,0x00,0x00};
+
+static const uint8_t broadcastMacAddress[6u] = {0x00u,0x00u,0x00u,0x00u,0x00u,0x00u};
+static const uint8_t arpType[2u] = {0x80u, 0x00u};
+static const uint8_t hardwareTypeEthernet[2u] = {0x00u, 0x01u};
+static const uint8_t protocolTypeIPv4[2u] = {0x08u, 0x00u};
+static const uint8_t operationCodeRequest[2u] = {0x00u, 0x01u};
+static const uint8_t operationCodeResponse[2u] = {0x00, 0x02u};
+static const uint32_t  arpTableExpirationTime = 20u; // 20min
+
+
+
 
 /* private functions */
+/** Adds an entry or updates an arp table entry
+ *  @param macAddress mac address of the new entry
+ *  @ipAddress ip address of the new entry
+ */
 void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress);
-void Arp_createResponse(uint8_t* sourceMacAddress, uint8_t* sourceIpAddress, uint8_t* destinationMacAddress, uint8_t* targetIpAddress);
+/** Adds an entry or updates an arp table entry
+ *  @param macAddress mac address of the new entry
+ *  @param ipAddress ip address of the new entry
+ */
+void Arp_createResponse(uint8_t* packetSourceAddress, uint8_t* sourceMacAddress, uint8_t* sourceIpAddress, uint8_t* destinationMacAddress, uint8_t* destinationIpAddress);
+/** Removes one entry from the arp table 
+ */
+void Arp_removeArpTableEntry(uint8_t pos);
+/** Looks for outdated arp table entries 
+ */
+void Arp_updateArpTable(void);
 
 int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
 {
@@ -17,11 +44,9 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
     
     arpPacket = (ArpPacket*)requestData;
     
-    if ((arpPacket->hardwareType[0u] == 0x00u)
-        && (arpPacket->hardwareType[1u] == 0x01u))  // Ethernet
+    if (memcmp(arpPacket->hardwareType, hardwareTypeEthernet, 2u) == (int)0)  // Ethernet
     {
-        if ((arpPacket->protocolType[0u] == 0x08u)
-            && (arpPacket->protocolType[1u] == 0x00u))  // IPv4
+        if (memcmp(arpPacket->protocolType, protocolTypeIPv4, 2u) == (int)0)  // IPv4
         {
             ArpPacketEthernetIPv4 *arpPacketEthernetIPv4;
             arpPacketEthernetIPv4 = (ArpPacketEthernetIPv4*)requestData;
@@ -29,10 +54,18 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
             Arp_addArpTableEntry(arpPacketEthernetIPv4->sourceHardwareAddress,  
                                  arpPacketEthernetIPv4->sourceProtocolAddress); // Update out arp table
             
-            Arp_createResponse(arpPacketEthernetIPv4->sourceHardwareAddress,
-                               arpPacketEthernetIPv4->sourceProtocolAddress,
-                               arpPacketEthernetIPv4->destinationHardwareAddress,
-                               arpPacketEthernetIPv4->destinationProtocolAddress);
+            if (memcmp(arpPacket->operationCode, operationCodeRequest, 2u) == (int)2u)
+            {
+                Arp_createResponse(sourceAddress,
+                                arpPacketEthernetIPv4->sourceHardwareAddress,
+                                arpPacketEthernetIPv4->sourceProtocolAddress,
+                                arpPacketEthernetIPv4->destinationHardwareAddress,
+                                arpPacketEthernetIPv4->destinationProtocolAddress);
+            }
+            else
+            {
+                // we do not respond to responses
+            }
             
             return (int8_t)(0);
         }
@@ -49,18 +82,31 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
     return (int8_t)(-1);
 }
 
-void Arp_createResponse(uint8_t* sourceMacAddress,
+void Arp_createResponse(uint8_t* packetSourceAddress,
+                        uint8_t* sourceMacAddress,
                         uint8_t* sourceIpAddress,
                         uint8_t* destinationMacAddress, 
                         uint8_t* destinationIpAddress)
 {
-    uint8_t i;
-    
     if (memcmp((void*)destinationMacAddress, (void*)broadcastMacAddress, 6u) == (int)(0))  // we have received an brodcast
     {
         if (memcmp((void*)destinationIpAddress, (void*)localIpAddress, 4u) == (int)(0))
         {
-            
+            // lets respond
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.hardwareType), (void*)hardwareTypeEthernet, 2u);
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.protocolType), (void*)protocolTypeIPv4, 2u);
+            arpEthernetIPv4ResponsePacket.hardwareAddressLength = 6u;
+            arpEthernetIPv4ResponsePacket.protocolAddressLength = 4u;
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.operationCode), (void*)operationCodeResponse, 2u);
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.sourceHardwareAddress), (void*)EthernetLinkLayer_macAddress(), 6u);
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.sourceProtocolAddress), (void*)localIpAddress, 4u);
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationHardwareAddress), (void*)sourceMacAddress, 6u);
+            memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationProtocolAddress), (void*)sourceIpAddress, 4u);
+            EthernetLinkLayer_sendPacket(EthernetLinkLayer_macAddress(),
+                                         packetSourceAddress,
+                                         (uint8_t*)arpType,
+                                         (uint8_t*)(&arpEthernetIPv4ResponsePacket),
+                                         28u);
         }
         else
         {
@@ -76,7 +122,6 @@ void Arp_createResponse(uint8_t* sourceMacAddress,
 void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
 {
     uint8_t i;
-    uint8_t j;
     uint8_t targetTablePos;
     
     targetTablePos = arpTablePos+1u;
@@ -93,6 +138,8 @@ void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
     if (targetTablePos < ARP_TABLE_SIZE)
     {
         memcpy((void*)(arpTable[targetTablePos].macAddress), (void*)macAddress, 6u);    // copy mac address
+        memcpy((void*)(arpTable[targetTablePos].ipAddress), (void*)ipAddress, 4u);      // copy ip address
+        arpTable[targetTablePos].expirationTimestamp = timeTick + arpTableExpirationTime;
         
         if (targetTablePos > arpTablePos)   // if no entry was found a new entry was created
         {
@@ -103,4 +150,53 @@ void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
     {
         // Arp table is full
     }   
+}
+
+int8_t Arp_getIpAddress(uint8_t *macAddress, uint8_t *ipAddress)
+{
+    uint8_t i;
+    
+    for (i = 0u; i < arpTablePos; i++)
+    {
+        if (memcmp((void*)macAddress, (void*)(arpTable[i].macAddress), 6u) == (int)(0))
+        {
+            memcpy((void*)ipAddress, (void*)(arpTable[i].ipAddress), 4u);
+            return (int8_t)0;
+        }
+    }
+    
+    return (int8_t)(-1);    // we do not know the mac address
+}
+
+void Arp_removeArpTableEntry(uint8_t pos)
+{
+    uint8_t i;
+    
+    for (i = pos; i < arpTablePos; ++i)
+    {
+        memcpy(arpTable[i].macAddress, arpTable[i+1u].macAddress, 6u);
+        memcpy(arpTable[i].ipAddress, arpTable[i+1u].ipAddress, 4u);
+        arpTable[i].expirationTimestamp = arpTable[i+1u].expirationTimestamp;
+    }
+    
+    arpTablePos--;
+}
+
+void Arp_updateArpTable(void)
+{
+    uint8_t i;
+    
+    for (i = arpTablePos; i >= 0u; i++)
+    {
+        if (arpTable[i].expirationTimestamp >= timeTick)
+        {
+            Arp_removeArpTableEntry(i);
+        }
+    }
+}
+
+void Arp_timeTick1m(void)
+{
+    timeTick++;
+    Arp_updateArpTable();
 }
