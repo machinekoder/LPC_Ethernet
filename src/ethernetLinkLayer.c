@@ -6,19 +6,19 @@
 
 
 #define RX_DATA_BUFFER_SIZE  1542u   // 1542 bytes is biggest ethernet frame
-#define RX_DATA_BUFFER_COUNT 7u
+#define RX_DATA_BUFFER_COUNT 6u
 #define TX_DATA_BUFFER_SIZE  1542u
-#define TX_DATA_BUFFER_COUNT 3u
+#define TX_DATA_BUFFER_COUNT 2u
 
-static uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};   // default mac address
+static uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67u,0x00u,0x05u};   // default mac address
 
 static OS_SEM rxSemaphore;
 static EMAC_PACKETBUF_Type rxPacketBuffer;
 
 static EMAC_PACKETBUF_Type txPacketBuffer;
 
-static const uint32_t __attribute__ ((aligned (4))) *ethernetRxBufferData = (uint32_t*)0x20080000u;
-static const uint32_t __attribute__ ((aligned (4))) *ethernetTxBufferData = (uint32_t*)(0x20080000u + 2700u);
+//static uint32_t __attribute__ ((aligned (4))) *ethernetRxBufferData = (uint32_t*)0x20080000u;
+//static uint32_t __attribute__ ((aligned (4))) *ethernetTxBufferData = (uint32_t*)(0x20080000u + 2700u);
 
 static OS_MEM ethernetRxBuffer;
 static OS_MEM ethernetTxBuffer;
@@ -37,7 +37,7 @@ void EthernetLinkLayer_TaskRead(void* p_arg)
     // init rx buffer
     OSMemCreate((OS_MEM     *) &ethernetRxBuffer,
                 (CPU_CHAR   *) "EthernetRxBuffer",
-                (void       *) &ethernetRxBufferData,
+                (void       *) 0x20080000u,
                 (OS_MEM_QTY  ) RX_DATA_BUFFER_COUNT,
                 (OS_MEM_SIZE ) RX_DATA_BUFFER_SIZE,
                 (OS_ERR     *) &err);
@@ -63,16 +63,16 @@ void EthernetLinkLayer_TaskRead(void* p_arg)
             
             EMAC_ReadPacketBuffer(&rxPacketBuffer);
             
+            if (EMAC_CheckReceiveIndex() == TRUE)
+            {
+                EMAC_UpdateRxConsumeIndex();
+            }
+            
             OSQPost((OS_Q   *) &ethernetRxQueue,
                     (void   *) rxDataBuffer,
                     (OS_MSG_SIZE) EMAC_GetReceiveDataSize(),
                     (OS_OPT  ) OS_OPT_POST_FIFO,
                     (OS_ERR *) &err);
-            
-            if (EMAC_CheckReceiveIndex() == TRUE)
-            {
-                EMAC_UpdateRxConsumeIndex();
-            }
         }
     }
 }
@@ -92,7 +92,7 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     // init tx buffer
     OSMemCreate((OS_MEM     *) &ethernetTxBuffer,
                 (CPU_CHAR   *) "EthernetTxBuffer",
-                (void       *) &ethernetTxBufferData,
+                (void       *) (0x20080000u + 2700u),
                 (OS_MEM_QTY  ) TX_DATA_BUFFER_COUNT,
                 (OS_MEM_SIZE ) TX_DATA_BUFFER_SIZE,
                 (OS_ERR     *) &err);
@@ -100,7 +100,7 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
     
     while (DEF_TRUE)
     {
-        txDataBuffer = OSQPend((OS_Q   *) &ethernetRxQueue,
+        txDataBuffer = OSQPend((OS_Q   *) &ethernetTxQueue,
                                 (OS_TICK ) 0u,
                                 (OS_OPT  ) OS_OPT_PEND_BLOCKING,
                                 (OS_MSG_SIZE *) &msgSize,
@@ -212,7 +212,7 @@ int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource,
     
     txPacketBuffer.ulDataLen = ETHERNET_FRAME_HEADER_SIZE + payloadSize;
     
-    OSQPost((OS_Q   *) &ethernetRxQueue,
+    OSQPost((OS_Q   *) &ethernetTxQueue,
             (void   *) txDataBuffer,
             (OS_MSG_SIZE) EMAC_GetReceiveDataSize(),
             (OS_OPT  ) OS_OPT_POST_FIFO,

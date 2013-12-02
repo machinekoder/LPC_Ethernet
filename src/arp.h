@@ -43,12 +43,12 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData);
  */
 void Arp_createRequest(uint8_t* ipAddress);
 
-/** Resolves an mac address to an IPv4 address based on the arp table
- *  @param macAddress mac address to resolve
- *  @param ipAddress  pointer to where the ip address should be stored
+/** Resolves an IPv4 address to a MAC address based on the arp table
+ *  @param ipAddress ip address to resolve
+ *  @param macAddress  pointer to where the mac address should be stored
  *  @return 0 if entry was found -1 if not
  */
-int8_t Arp_getIpAddress(uint8_t *macAddress, uint8_t *ipAddress);
+int8_t Arp_getMacAddress(uint8_t *ipAddress, uint8_t *macAddress);
 
 /** Sets the local IP address
  *  @param ipAddress the IP address to set

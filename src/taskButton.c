@@ -1,21 +1,8 @@
 #include "taskButton.h"
+#include "ip.h"
 #include "app.h"
 
-#define BUTTON_STEP_UM 5000
-
-bool buttonXPlusTest  = FALSE;
-bool buttonXMinusTest = FALSE;
-bool buttonYPlusTest  = FALSE;
-bool buttonYMinusTest = FALSE;
-bool buttonZPlusTest  = FALSE;
-bool buttonZMinusTest = FALSE;
-bool buttonOkTest     = FALSE;
-bool endschalterXPlusTest  = FALSE;
-bool endschalterXMinusTest = FALSE;
-bool endschalterYPlusTest  = FALSE;
-bool endschalterYMinusTest = FALSE;
-bool endschalterZPlusTest  = FALSE;
-bool endschalterZMinusTest = FALSE;
+static const uint8_t targetIp[4u] = {10u, 42u, 0u, 1u};
 
 void buttonInit();
 
@@ -40,6 +27,7 @@ void App_TaskButton (void *p_arg)
                     if (value.id == Button1)
                     {
                         // do something
+                        Ip_sendPing((uint8_t*)targetIp);
                     }
                 }
             }

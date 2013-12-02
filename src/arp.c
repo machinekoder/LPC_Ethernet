@@ -51,7 +51,7 @@ int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
             Arp_addArpTableEntry(arpPacketEthernetIPv4->sourceHardwareAddress,  
                                  arpPacketEthernetIPv4->sourceProtocolAddress); // Update out arp table
             
-            if (memcmp((void*)(arpPacket->operationCode), (void*)operationCodeRequest, 2u) == (int)2u)
+            if (memcmp((void*)(arpPacketEthernetIPv4->operationCode), (void*)operationCodeRequest, 2u) == (int)0)
             {
                 Arp_createResponse(sourceAddress,
                                 arpPacketEthernetIPv4->sourceHardwareAddress,
@@ -167,15 +167,15 @@ void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
     }   
 }
 
-int8_t Arp_getIpAddress(uint8_t *macAddress, uint8_t *ipAddress)
+int8_t Arp_getMacAddress(uint8_t *ipAddress, uint8_t *macAddress)
 {
     uint8_t i;
     
     for (i = 0u; i < arpTablePos; i++)
     {
-        if (memcmp((void*)macAddress, (void*)(arpTable[i].macAddress), 6u) == (int)(0))
+        if (memcmp((void*)ipAddress, (void*)(arpTable[i].ipAddress), 4u) == (int)(0))
         {
-            memcpy((void*)ipAddress, (void*)(arpTable[i].ipAddress), 4u);
+            memcpy((void*)macAddress, (void*)(arpTable[i].macAddress), 4u);
             return (int8_t)0;
         }
     }

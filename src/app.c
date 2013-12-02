@@ -103,9 +103,9 @@ int main (void)
     emacConfigStruct.pbEMAC_Addr = EthernetLinkLayer_macAddress();
     OS_EMAC_Init(EthernetLinkLayer_rxSemaphore());
     EMAC_Init(&emacConfigStruct);
-    EMAC_SetFilterMode(EMAC_RFC_UCAST_EN, DISABLE);
-    EMAC_SetFilterMode(EMAC_RFC_BCAST_EN, DISABLE);
-    EMAC_SetFilterMode(EMAC_RFC_MCAST_EN, DISABLE);
+    EMAC_SetFilterMode(EMAC_RFC_UCAST_EN, ENABLE);
+    EMAC_SetFilterMode(EMAC_RFC_BCAST_EN, ENABLE);
+    EMAC_SetFilterMode(EMAC_RFC_MCAST_EN, ENABLE);
     EMAC_SetFilterMode(EMAC_RFC_PERFECT_EN, ENABLE);
     EMAC_SetFilterMode(EMAC_RFC_MAGP_WOL_EN, DISABLE);
     EMAC_SetFilterMode(EMAC_RFC_PFILT_WOL_EN, DISABLE);
