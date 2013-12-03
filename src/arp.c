@@ -13,6 +13,7 @@ static uint32_t timeTick = 0u;
 static uint8_t localIpAddress[4u] = {10u, 42u, 0u, 10u};
 
 static const uint8_t broadcastMacAddress[6u] = {0x00u,0x00u,0x00u,0x00u,0x00u,0x00u};
+static const uint8_t broadcastHardwareAddress[6u] = {0xFFu,0xFFu,0xFFu,0xFFu,0xFFu,0xFFu};
 static const uint8_t arpType[2u] = {0x08u, 0x06u};
 static const uint8_t hardwareTypeEthernet[2u] = {0x00u, 0x01u};
 static const uint8_t protocolTypeIPv4[2u] = {0x08u, 0x00u};
@@ -152,7 +153,7 @@ void Arp_createRequest(uint8_t* ipAddress)
     memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationHardwareAddress), (void*)broadcastMacAddress, 6u);
     memcpy((void*)(arpEthernetIPv4ResponsePacket.destinationProtocolAddress), (void*)ipAddress, 4u);
     EthernetLinkLayer_sendPacket(EthernetLinkLayer_macAddress(),
-                                    (uint8_t*)broadcastMacAddress,
+                                    (uint8_t*)broadcastHardwareAddress,
                                     (uint8_t*)arpType,
                                     (uint8_t*)(&arpEthernetIPv4ResponsePacket),
                                     28u);   
@@ -163,7 +164,7 @@ void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
     uint8_t i;
     uint8_t targetTablePos;
     
-    targetTablePos = arpTablePos+1u;
+    targetTablePos = arpTablePos;
     
     for (i = 0u; i <= arpTablePos; i++)
     {
@@ -180,7 +181,7 @@ void Arp_addArpTableEntry(uint8_t *macAddress, uint8_t *ipAddress)
         memcpy((void*)(arpTable[targetTablePos].ipAddress), (void*)ipAddress, 4u);      // copy ip address
         arpTable[targetTablePos].expirationTimestamp = timeTick + arpTableExpirationTime;
         
-        if (targetTablePos > arpTablePos)   // if no entry was found a new entry was created
+        if (targetTablePos >= arpTablePos)   // if no entry was found a new entry was created
         {
             arpTablePos++;
         }
@@ -243,4 +244,9 @@ void Arp_timeTick1m(OS_TMR* p_tmr, void* p_arg)
 {
     timeTick++;
     Arp_updateArpTable();
+}
+
+uint8_t* Arp_getTable(void)
+{
+    return (uint8_t*)arpTable;
 }

@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #define ARP_TABLE_SIZE 10u
+#define ARP_TABLE_BYTE_SIZE 140u
 
 /** Generic ARP packet header */
 typedef struct {
@@ -64,3 +65,5 @@ void Arp_setLocalIpAddress(uint8_t *ipAddress);
 /** 1 minute tick for cleaning up the arp tables
  */
 void Arp_timeTick1m(OS_TMR *p_tmr, void *p_arg);
+
+uint8_t* Arp_getTable(void);

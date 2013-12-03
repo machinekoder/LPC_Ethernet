@@ -114,12 +114,12 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
         
         txPacketBuffer.pbDataBuf = (uint32_t*)txDataBuffer;
               
+        EMAC_WritePacketBuffer(&txPacketBuffer);
+        
         if(EMAC_CheckTransmitIndex() == TRUE)    // if not available wait 1ms
         {
             EMAC_UpdateTxProduceIndex();
         }
-        
-        EMAC_WritePacketBuffer(&txPacketBuffer);
         
         OSMemPut((OS_MEM    *) &ethernetTxBuffer,
                  (void      *) txDataBuffer,
@@ -165,6 +165,7 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
     
     if (memcmp((void*)(ethernetFrameHeader->etherType), (void*)etherTypeCustom, 2u) == (int)0) // Custom type
     {
+#if 0
         uint8_t response[3] = { 'A', 'C', 'K' };
         uint32_t responseSize = 3u;
         
@@ -174,6 +175,13 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
                                      ethernetFrameHeader->etherType,
                                      response,
                                      responseSize);
+#else
+    EthernetLinkLayer_sendPacket(ethernetFrameHeader->macDestination,
+                                    ethernetFrameHeader->macSource,
+                                    ethernetFrameHeader->etherType,
+                                    Arp_getTable(),
+                                    ARP_TABLE_BYTE_SIZE);
+#endif
     }
     else if (memcmp((void*)(ethernetFrameHeader->etherType), (void*)etherTypeArp, 2u) == (int)0) // ARP protocol
     {
