@@ -16,15 +16,15 @@ void App_TaskButton (void *p_arg)
     buttonInit();
         
     while(DEF_TRUE) {
-        for(count=0; count<=10; count++)
+        for(count=0u; count<=10u; count++)
         {
             Button_task();        // reads the button values
             OSTimeDlyHMSM(0u, 0u, 0u, 10u, OS_OPT_TIME_HMSM_STRICT, &err);
-            if(count==10)
+            if (count==10u)
             {
                 while (Button_getPress(&value) != (int8)(-1))
                 {
-                    if (value.id == Button1)
+                    if (value.id == (uint8)Button1)
                     {
                         // do something
                         Ip_sendPing((uint8_t*)targetIp);
@@ -37,7 +37,7 @@ void App_TaskButton (void *p_arg)
 
 void buttonInit ()
 {
-    Button_initialize2(1E4, 1E5);
+    Button_initialize2(10000u, 100000u);    // 10ms sampling, 100ms timeout
     //+++++++++++++++++++++++++++++++++++++++++BUTTON++++++++++++++++++++++++++++++++++++++++++++++++++
     Button_initializeButton(Button1, 2u, 10u, Button_Type_LowActive);
  }

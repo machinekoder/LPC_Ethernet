@@ -1,5 +1,8 @@
 #include "arp.h"
 #include "ethernetLinkLayer.h"
+#include <os_cfg_app.h>
+
+OS_TMR tickTimer;
 
 static ArpTableItem arpTable[ARP_TABLE_SIZE];
 static uint8_t      arpTablePos = 0u;
@@ -34,6 +37,27 @@ void Arp_removeArpTableEntry(uint8_t pos);
 /** Looks for outdated arp table entries 
  */
 void Arp_updateArpTable(void);
+
+int8_t Arp_initialize(void)
+{
+    OS_ERR err;
+    
+    OSTmrCreate((OS_TMR *) &tickTimer,
+                (CPU_CHAR *) "ARP tick timer",
+                (OS_TICK ) 0u,
+                (OS_TICK ) (OS_CFG_TMR_TASK_RATE_HZ*60u),
+                (OS_OPT  ) OS_OPT_TMR_PERIODIC,
+                (OS_TMR_CALLBACK_PTR) &Arp_timeTick1m,
+                (void   *) NULL,
+                (OS_ERR *) &err);
+    
+    if (err != OS_ERR_NONE)
+    {
+        return (int8_t)(-1);
+    }
+    
+    return (int8_t)0;
+}
 
 int8_t Arp_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
 {
@@ -187,7 +211,7 @@ void Arp_removeArpTableEntry(uint8_t pos)
 {
     uint8_t i;
     
-    for (i = pos; i < arpTablePos; ++i)
+    for (i = pos; i < arpTablePos; i++)
     {
         memcpy((void*)(arpTable[i].macAddress), (void*)(arpTable[i+1u].macAddress), 6u);
         memcpy((void*)(arpTable[i].ipAddress), (void*)(arpTable[i+1u].ipAddress), 4u);
@@ -215,7 +239,7 @@ void Arp_setLocalIpAddress(uint8_t* ipAddress)
     memcpy((void*)localIpAddress, (void*)ipAddress, 4u);
 }
 
-void Arp_timeTick1m(void)
+void Arp_timeTick1m(OS_TMR* p_tmr, void* p_arg)
 {
     timeTick++;
     Arp_updateArpTable();

@@ -5,6 +5,7 @@
 #include "app.h"
 #include "taskStart.h"
 #include "ethernetLinkLayer.h"
+#include "ip.h"
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
@@ -23,7 +24,8 @@
 
 EMAC_CFG_Type emacConfigStruct;
 
-uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u}; 
+uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67,0x00u,0x05u};
+uint8_t ipv4Address[4] = {10u,42u,0u,10u};
 
 /*
 ************************************************************************************************
@@ -118,6 +120,8 @@ int main (void)
     CSP_IntEn(CSP_INT_CTRL_NBR_MAIN, CSP_INT_SRC_NBR_ETHER_00);
     
     EthernetLinkLayer_setMacAddress(macAddress);
+    Ip_initialize();
+    Ip_setIPv4Address(ipv4Address);
 
 #if 0
     USBInit();                                               /* USB Initialization */

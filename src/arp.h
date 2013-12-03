@@ -1,4 +1,5 @@
 #pragma once
+#include "app.h"
 #include <stdint.h>
 
 #define ARP_TABLE_SIZE 10u
@@ -31,6 +32,11 @@ typedef struct {
     uint32_t expirationTimestamp;
 } ArpTableItem;
 
+/** Initializes the arp library
+ *  @return 0 on success, -1 on failure
+ */
+int8_t Arp_initialize(void);
+
 /** Processes a arp request
  *  @param sourceAddress source mac address
  *  @param requestData arp packet payload
@@ -57,4 +63,4 @@ void Arp_setLocalIpAddress(uint8_t *ipAddress);
 
 /** 1 minute tick for cleaning up the arp tables
  */
-void Arp_timeTick1m(void);
+void Arp_timeTick1m(OS_TMR *p_tmr, void *p_arg);
