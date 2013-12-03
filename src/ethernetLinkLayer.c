@@ -1,5 +1,6 @@
 #include "ethernetLinkLayer.h"
 #include "arp.h"
+#include "ip.h"
 #include <os.h>
 #include <lpc17xx_emac.h>
 #include <../ComplexCortex/driver/LPC13xx/types.h>
@@ -9,6 +10,10 @@
 #define RX_DATA_BUFFER_COUNT 6u
 #define TX_DATA_BUFFER_SIZE  1542u
 #define TX_DATA_BUFFER_COUNT 2u
+
+static const uint8_t etherTypeCustom[2u] = {0x88u,0x66u};
+static const uint8_t etherTypeArp[2u] = {0x08u,0x06u};
+static const uint8_t etherTypeIp[2u] = {0x08u,0x00u};
 
 static uint8_t macAddress[6] = {0x00u,0xE5u,0xC1u,0x67u,0x00u,0x05u};   // default mac address
 
@@ -158,8 +163,7 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
     payload             = &data[ETHERNET_FRAME_HEADER_SIZE];                    // payload should always start at position 22
     payloadSize         = size - ETHERNET_FRAME_HEADER_SIZE;
     
-    if ((ethernetFrameHeader->etherType[0] == 0x88u)
-        && (ethernetFrameHeader->etherType[1] == 0x66u))
+    if (memcmp((void*)(ethernetFrameHeader->etherType), (void*)etherTypeCustom, 2u) == (int)0) // Custom type
     {
         uint8_t response[3] = { 'A', 'C', 'K' };
         uint32_t responseSize = 3u;
@@ -171,10 +175,13 @@ void EthernetLinkLayer_processRxData(uint8_t* data, uint32_t size)
                                      response,
                                      responseSize);
     }
-    else if ((ethernetFrameHeader->etherType[0] == 0x08u)   // ARP protocol request
-        && (ethernetFrameHeader->etherType[1] == 0x06u))
+    else if (memcmp((void*)(ethernetFrameHeader->etherType), (void*)etherTypeArp, 2u) == (int)0) // ARP protocol
     {
         Arp_processRequest(ethernetFrameHeader->macSource, payload);
+    }
+    else if (memcmp((void*)(ethernetFrameHeader->etherType), (void*)etherTypeIp, 2u) == (int)0)
+    {
+        Ip_processRequest(payload);
     }
     else
     {

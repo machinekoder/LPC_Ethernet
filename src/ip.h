@@ -27,7 +27,7 @@ typedef struct {
 
 int8_t Ip_initialize(void);
 
-int8_t Ip_processRequest(uint8_t* sourceAddress, uint8_t* requestData);
+int8_t Ip_processRequest(uint8_t* requestData);
 
 int8_t Ip_sendIPv4Packet(uint8_t protocol, uint8_t* destinationAddress, uint8_t* payload, uint32_t payloadSize);
 

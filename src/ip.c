@@ -15,6 +15,8 @@ static uint8_t ipv4Address[4u] = {10u, 42u, 0u, 10u};
 
 static uint8_t ipSendBuffer[IP_SEND_BUFFER_SIZE];
 
+int8_t Ip_processIcmp(uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData);
+
 int8_t Ip_initialize(void)
 {
     if (Arp_initialize() == (int8_t)(-1))
@@ -25,13 +27,64 @@ int8_t Ip_initialize(void)
     return (int8_t)0;
 }
 
-int8_t Ip_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
+int8_t Ip_processRequest(uint8_t* requestData)
 {
     IPv4Header *ipv4Header;
+    uint8_t ipHeaderLength;
     
     ipv4Header = (IPv4Header*)requestData;
     
+    if (ipv4Header->version == 4u)
+    {
+        ipHeaderLength = ipv4Header->ihl;
+        if (ipv4Header->protocol == protocolIcmp)
+        {
+            return Ip_processIcmp(ipv4Header->sourceAddress, 
+                                  ipv4Header->destinationAddress, 
+                                  &(requestData[4u*ipHeaderLength]));
+        }
+        else
+        {
+            // protocol not known
+        }
+    }
+    else
+    {
+        // IP version other to 4 -> ignore
+    }
     
+    return (int8_t)(-1);
+}
+
+int8_t Ip_processIcmp(uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData)
+{
+    IcmpPacket *icmpPacket;
+    IcmpPacket *icmpResponsePacket;
+    uint8_t    icmpResponse[8u];
+    
+    icmpPacket = (IcmpPacket*)requestData;
+    icmpResponsePacket = (IcmpPacket*)icmpResponse;
+    
+    if (icmpPacket->type == 8u) // echoRequest
+    {
+        if (memcmp((void*)destinationAddress, (void*)ipv4Address, 4u) == (int)0) // our address
+        {
+            icmpResponsePacket->type = 0u; // echo response
+            icmpResponsePacket->code = 0u;
+            icmpResponsePacket->checksum[0u] = 0x3bu;
+            icmpResponsePacket->checksum[1u] = 0x83u;
+            
+            Ip_sendIPv4Packet(protocolIcmp, sourceAddress, icmpResponse, 8u);
+        }
+        return (int8_t)0;
+    }
+    else
+    {
+        // unsupported type
+    }
+    
+    
+    return (int8_t)(-1);
 }
 
 int8_t Ip_sendIPv4Packet(uint8_t protocol, uint8_t *destinationAddress, uint8_t *payload, uint32_t payloadSize)
