@@ -5,7 +5,7 @@
 
 #define IP_SEND_BUFFER_SIZE 1500u
 #define IP_ARP_RETRIES 5u
-#define IP_ARP_TIMEOUT 10u
+#define IP_ARP_TIMEOUT 100u
 
 static const uint8_t protocolTypeIp[2u] = {0x08u, 0x00u};
 static const uint8_t protocolIcmp = 1u;
@@ -23,6 +23,15 @@ int8_t Ip_initialize(void)
     }
     
     return (int8_t)0;
+}
+
+int8_t Ip_processRequest(uint8_t* sourceAddress, uint8_t* requestData)
+{
+    IPv4Header *ipv4Header;
+    
+    ipv4Header = (IPv4Header*)requestData;
+    
+    
 }
 
 int8_t Ip_sendIPv4Packet(uint8_t protocol, uint8_t *destinationAddress, uint8_t *payload, uint32_t payloadSize)
