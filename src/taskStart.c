@@ -3,6 +3,7 @@
 #include "taskButton.h"
 #include "taskUsbConnection.h"
 #include "ethernetLinkLayer.h"
+#include "taskPeriodicProcesses.h"
 
 /*
 ************************************************************************************************
@@ -109,6 +110,19 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_PRIO     )6,
                 (CPU_STK    *)EthernetLinkLayer_TaskProcessStk,
+                (CPU_STK_SIZE)0,
+                (CPU_STK_SIZE)APP_STACK_SIZE,
+                (OS_MSG_QTY  )0,
+                (OS_TICK     )0,
+                (void       *)0,
+                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
+                (OS_ERR     *)&err);
+    OSTaskCreate((OS_TCB     *)&App_PeriodicProcesses_TaskTCB,
+                (CPU_CHAR   *)"PeriodicProcesses",
+                (OS_TASK_PTR )App_PeriodicProcesses_Task,
+                (void       *)0,
+                (OS_PRIO     )6,
+                (CPU_STK    *)App_PeriodicProcesses_TaskStk,
                 (CPU_STK_SIZE)0,
                 (CPU_STK_SIZE)APP_STACK_SIZE,
                 (OS_MSG_QTY  )0,

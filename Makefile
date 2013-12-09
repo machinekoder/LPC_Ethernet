@@ -11,6 +11,7 @@ TESTPATH = test
 SRC = $(SOURCEPATH)/app.c
 SRC += $(SOURCEPATH)/taskStart.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
+SRC += $(SOURCEPATH)/taskPeriodicProcesses.c
 SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/taskButton.c
 SRC += $(SOURCEPATH)/ethernetLinkLayer.c

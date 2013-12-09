@@ -3,7 +3,6 @@
 #include "ip.h"
 #include <os.h>
 #include <lpc17xx_emac.h>
-#include <../ComplexCortex/driver/LPC13xx/types.h>
 
 
 #define RX_DATA_BUFFER_SIZE  1542u   // 1542 bytes is biggest ethernet frame
