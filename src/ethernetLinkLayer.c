@@ -101,7 +101,7 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
                 (OS_MEM_QTY  ) TX_DATA_BUFFER_COUNT,
                 (OS_MEM_SIZE ) TX_DATA_BUFFER_SIZE,
                 (OS_ERR     *) &err);
-    txPacketBuffer.ulDataLen = TX_DATA_BUFFER_SIZE;
+    
     
     while (DEF_TRUE)
     {
@@ -113,6 +113,7 @@ void EthernetLinkLayer_TaskWrite(void* p_arg)
                                 (OS_ERR *) &err);
         
         txPacketBuffer.pbDataBuf = (uint32_t*)txDataBuffer;
+        txPacketBuffer.ulDataLen = (uint32_t)msgSize;
               
         EMAC_WritePacketBuffer(&txPacketBuffer);
         
@@ -225,11 +226,9 @@ int8_t EthernetLinkLayer_sendPacket(uint8_t* macSource,
     memcpy((void*)(ethernetFrameHeader->etherType), (void*)type, 2u);
     memcpy((void*)destinationPayload, (void*)payload, payloadSize);
     
-    txPacketBuffer.ulDataLen = ETHERNET_FRAME_HEADER_SIZE + payloadSize;
-    
     OSQPost((OS_Q   *) &ethernetTxQueue,
             (void   *) txDataBuffer,
-            (OS_MSG_SIZE) EMAC_GetReceiveDataSize(),
+            (OS_MSG_SIZE) (ETHERNET_FRAME_HEADER_SIZE + payloadSize),
             (OS_OPT  ) OS_OPT_POST_FIFO,
             (OS_ERR *) &err);
     

@@ -24,7 +24,9 @@ void EthernetLinkLayer_TaskProcess(void *p_arg);
 
 uint8_t*    EthernetLinkLayer_macAddress(void);
 void        EthernetLinkLayer_setMacAddress(uint8_t* address);
-void        EthernetLinkLayer_setMacAddress(uint8_t *address);
 OS_SEM*     EthernetLinkLayer_rxSemaphore(void);
+
+int8_t      EthernetLinkLayer_allocateMemory(void *dataPointer);
+int8_t      EthernetLinkLayer_freeMemory(void *dataPointer);
 
 int8_t      EthernetLinkLayer_sendPacket(uint8_t* macSource, uint8_t* macDestination, uint8_t* type, uint8_t* payload, uint32_t payloadSize);

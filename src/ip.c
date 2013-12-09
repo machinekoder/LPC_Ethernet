@@ -16,7 +16,7 @@ static uint8_t ipv4Address[4u] = {10u, 42u, 0u, 10u};
 
 static uint8_t ipSendBuffer[IP_SEND_BUFFER_SIZE];
 
-int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData);
+int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData, uint16_t reqestDataSize);
 uint16_t Ip_calcChecksum(uint16_t * header, uint16_t len );
 
 int8_t Ip_initialize(void)
@@ -45,7 +45,8 @@ int8_t Ip_processRequest(uint8_t* requestData)
             return Ip_processIcmp(ipv4Header->ttl-1u,
                                   ipv4Header->sourceAddress, 
                                   ipv4Header->destinationAddress, 
-                                  &(requestData[4u*ipHeaderLength]));
+                                  &(requestData[4u*ipHeaderLength]),
+                                  (uint16_t)((ipv4Header->totalLength[0u] << 8) || (ipv4Header->totalLength[1u])));
         }
         else
         {
@@ -76,7 +77,7 @@ uint16_t Ip_icmpChecksum(uint16_t *data, uint8_t size)
     return ~checksum;
 }
 
-int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData)
+int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationAddress, uint8_t* requestData, uint16_t reqestDataSize)
 {
     IcmpPacket *icmpPacket;
     IcmpPacket *icmpResponsePacket;
