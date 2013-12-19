@@ -70,7 +70,7 @@ int main (void)
 
     OSInit(&os_err);                                                        /* Init uC/OS-III */
 
-    Debug_printf(Debug_Level_1, "Starting init");
+//    Debug_printf(Debug_Level_1, "Starting init");
 #if 0
     /* Enable Timer0 Interrupt.*/
     CSP_IntVectReg((CSP_DEV_NBR   )CSP_INT_CTRL_NBR_MAIN,
@@ -141,7 +141,7 @@ int main (void)
 #endif
     //Cb_initialize(&cncQueueBuffer, CNC_QUEUE_BUFFER_SIZE, sizeof(QueueItem), (void*)&cncQueueBufferData);
     
-    Debug_printf(Debug_Level_1, "Init finished");
+//    Debug_printf(Debug_Level_1, "Init finished");
 
     if(os_err != OS_ERR_NONE)
         for(;;);

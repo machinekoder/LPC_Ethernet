@@ -3,6 +3,9 @@
 #include "taskButton.h"
 #include "taskUsbConnection.h"
 #include "ethernetLinkLayer.h"
+#include "ip.h"
+
+static const uint8_t targetIp[4u] = {10u, 42u, 0u, 1u};
 
 /*
 ************************************************************************************************
@@ -118,6 +121,7 @@ void App_TaskStart (void *p_arg)
                 (OS_ERR     *)&err);
 
     while (DEF_TRUE) {
-        OSTimeDlyHMSM(0u, 0u, 10u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+        OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
+         Ip_sendPing((uint8_t*)targetIp);
     }
 }

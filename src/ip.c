@@ -80,7 +80,7 @@ int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationA
 {
     IcmpPacket *icmpPacket;
     IcmpPacket *icmpResponsePacket;
-    uint8_t    icmpResponse[8u];
+    uint8_t    icmpResponse[64u];
     uint16_t   icmpChecksum;
     
     icmpPacket = (IcmpPacket*)requestData;
@@ -93,14 +93,14 @@ int8_t Ip_processIcmp(uint8_t ttl, uint8_t* sourceAddress, uint8_t* destinationA
             icmpResponsePacket->type = 0u; // echo response
             icmpResponsePacket->code = 0u;
             memset((void*)(icmpResponsePacket->checksum), 0, 2u);
-            memcpy((void*)(icmpResponsePacket->data), (void*)(icmpPacket->data), 4u);
+            memcpy((void*)(icmpResponsePacket->data), (void*)(icmpPacket->data), 46u);
             
-            icmpChecksum = Ip_icmpChecksum((uint16_t*)icmpResponsePacket, 8u);
+            icmpChecksum = Ip_calcChecksum((uint16_t*)icmpResponsePacket, 64u);//Ip_icmpChecksum((uint16_t*)icmpResponsePacket, 8u);
             
-            icmpResponsePacket->checksum[0u] = (uint8_t)((icmpChecksum >> 8u) & 0xFFu);
-            icmpResponsePacket->checksum[1u] = (uint8_t)(icmpChecksum & 0xFFu);
+            icmpResponsePacket->checksum[1u] = (uint8_t)((icmpChecksum >> 8u) & 0xFFu);
+            icmpResponsePacket->checksum[0u] = (uint8_t)(icmpChecksum & 0xFFu);
             
-            Ip_sendIPv4Packet(protocolIcmp, sourceAddress, ttl, icmpResponse, 8u);
+            Ip_sendIPv4Packet(protocolIcmp, sourceAddress, ttl, icmpResponse, 64u);
         }
         return (int8_t)0;
     }
@@ -201,22 +201,31 @@ int8_t Ip_sendIPv4Packet(uint8_t protocol, uint8_t *destinationAddress, uint8_t 
 
 int8_t Ip_sendPing(uint8_t* destinationAddress)
 {
-    uint8_t icmpData[8u];
+    uint8_t icmpData[64u];
     uint16_t icmpChecksum;
     IcmpPacket *icmpPacket;
+    static uint8_t data[4u] = {11u, 30u, 20u, 12u};
+    uint8_t i;
     
     icmpPacket = (IcmpPacket*)icmpData;
     
     icmpPacket->type = 8u;  // echo request
     icmpPacket->code = 0u;
     memset((void*)(icmpPacket->checksum), 0, 2u);
-    memcpy((void*)(icmpPacket->data), (void*)(icmpPacket->data), 4u);
+    for (i = 0u; i < 4u; i++)
+    {
+        icmpPacket->data[i] = data[i];
+        data[i]++;
+    }
     
-    icmpChecksum = Ip_icmpChecksum((uint16_t*)icmpPacket, 8u);
-    icmpPacket->checksum[0u] = (uint8_t)((icmpChecksum >> 8u) & 0xFFu);
-    icmpPacket->checksum[1u] = (uint8_t)(icmpChecksum & 0xFFu);
+    //memcpy((void*)(icmpPacket->data), (void*)(icmpPacket->data), 4u);
     
-    return Ip_sendIPv4Packet(protocolIcmp, destinationAddress, 64u, icmpData, 8u);
+    //icmpChecksum = Ip_icmpChecksum((uint16_t*)icmpPacket, 8u);
+    icmpChecksum = Ip_calcChecksum((uint16_t*)icmpPacket, 64u);
+    icmpPacket->checksum[1u] = (uint8_t)((icmpChecksum >> 8u) & 0xFFu);
+    icmpPacket->checksum[0u] = (uint8_t)(icmpChecksum & 0xFFu);
+    
+    return Ip_sendIPv4Packet(protocolIcmp, destinationAddress, 64u, icmpData, 64u);
 }
 
 void Ip_setIPv4Address(uint8_t* address)

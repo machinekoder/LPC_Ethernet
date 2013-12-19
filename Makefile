@@ -140,8 +140,8 @@ SSRC += $(LIBRARYPATH)/button.c
 #SSRC += $(LIBRARYPATH)/crc.c
 #SSRC += $(LIBRARYPATH)/ssp.c
 #SSRC += $(LIBRARYPATH)/rfm12.c
-SSRC += $(LIBRARYPATH)/debug.c
-SSRC += $(XPRINTFPATH)/xprintf.c
+#SSRC += $(LIBRARYPATH)/debug.c
+#SSRC += $(XPRINTFPATH)/xprintf.c
 
 
 LDFILE = LPC1758.ld
