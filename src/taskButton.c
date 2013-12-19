@@ -1,5 +1,4 @@
 #include "taskButton.h"
-#include "ip.h"
 #include "app.h"
 
 static const uint8_t targetIp[4u] = {10u, 42u, 0u, 1u};
@@ -27,7 +26,6 @@ void App_TaskButton (void *p_arg)
                     if (value.id == (uint8)Button1)
                     {
                         // do something
-                        Ip_sendPing((uint8_t*)targetIp);
                     }
                 }
             }

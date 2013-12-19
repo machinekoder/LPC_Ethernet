@@ -4,15 +4,28 @@
  **/
 #include "app.h"
 #include "taskStart.h"
-#include "ethernetLinkLayer.h"
-#include "ip.h"
 
 #define printfData(x) Debug_printf(Debug_Level_1,x)
 #define printfData2(x,y) Debug_printf(Debug_Level_1,x,y)
 
-//#define CNC_QUEUE_BUFFER_SIZE 10u
+static uint8_t eth_mac[6] = {0x5a,0x01,0x02,0x03,0x04,0x05};
 
-//const uint32 commandDelay = 15u;
+OS_SEM RX_SEM;
+
+OS_SEM  ECHOSem;         // semaphore used for signaling incoming CHAT segment
+
+OS_Q TXNicQ;
+
+OS_Q RX_Q;
+
+#define START_SRAM_BANK1 (0x20080000)
+#define RX_BUF_START (START_SRAM_BANK1)
+#define RX_BUF_LEN ((((EMAC_ETH_MAX_FLEN>>2)+2)*EMAC_NUM_RX_FRAG)+2/*+2 must be 32 bit aligned*/)
+
+#define TX_BUF_START (RX_BUF_START+RX_BUF_LEN)
+#define TX_BUF_LEN (((EMAC_ETH_MAX_FLEN>>2)+2)*EMAC_NUM_TX_FRAG)
+
+OS_MEM PacketMemArea;
 
 //ApplicationState applicationState = ApplicationState_Idle;
 
@@ -99,6 +112,7 @@ int main (void)
     CSP_TmrCfg (CSP_TMR_NBR_02,TIMER_FREQ);
 #endif
 
+#if 0
     // Init the Ethernet PHY
     EMAC_PinCfg();
     emacConfigStruct.Mode = EMAC_MODE_100M_FULL;
@@ -122,6 +136,7 @@ int main (void)
     EthernetLinkLayer_setMacAddress(macAddress);
     Ip_initialize();
     Ip_setIPv4Address(ipv4Address);
+#endif
 
 #if 0
     USBInit();                                               /* USB Initialization */

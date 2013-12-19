@@ -13,9 +13,6 @@ SRC += $(SOURCEPATH)/taskStart.c
 SRC += $(SOURCEPATH)/taskUsbConnection.c
 SRC += $(SOURCEPATH)/taskLed.c
 SRC += $(SOURCEPATH)/taskButton.c
-SRC += $(SOURCEPATH)/ethernetLinkLayer.c
-SRC += $(SOURCEPATH)/arp.c
-SRC += $(SOURCEPATH)/ip.c
 
 ################################################################################
 # Test files
@@ -48,6 +45,7 @@ INCPATH += -I"$(SYSPATH)"
 INCPATH += -I"$(SOURCEPATH)"
 INCPATH += -I"$(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/inc"
 INCPATH += -I"$(SOURCEPATH)/Libraries/ComplexCortex/include"
+INCPATH += -I"$(SOURCEPATH)/Libraries/net"
 
 ASRC += $(SOURCEPATH)/Libraries/CM3/src/startup_LPC17xx.asm
 ASRC += $(SOURCEPATH)/Libraries/uC-CPU/cpu_a.asm
@@ -118,6 +116,17 @@ SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbcontrol.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbstdreq.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usblibs.c
 SSRC += $(SOURCEPATH)/Libraries/uC-CSP/LPC17xx/USB/src/usbinit.c
+
+SSRC += $(SOURCEPATH)/Libraries/net/appl_cfg.c
+SSRC += $(SOURCEPATH)/Libraries/net/arp.c
+SSRC += $(SOURCEPATH)/Libraries/net/Clock.c
+SSRC += $(SOURCEPATH)/Libraries/net/ethernet.c
+SSRC += $(SOURCEPATH)/Libraries/net/ip.c
+SSRC += $(SOURCEPATH)/Libraries/net/shmemory.c
+SSRC += $(SOURCEPATH)/Libraries/net/Sockets.c
+SSRC += $(SOURCEPATH)/Libraries/net/TCP.c
+SSRC += $(SOURCEPATH)/Libraries/net/tcp_statehandler.c
+SSRC += $(SOURCEPATH)/Libraries/net/Utility_Procs.c
 
 SSRC += $(DRVPATH)/lpc17xx_nvic.c
 #SSRC += $(DRVPATH)/lpc17xx_dac.c

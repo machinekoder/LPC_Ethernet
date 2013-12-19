@@ -7,7 +7,7 @@ void App_TaskLed (void *p_arg)
     OS_ERR       err;
     (void)p_arg;                                             /* Prevent Compiler Warning */
     
-    Led_initialize(1u,29u,Led_LowActive_Yes); // onboard LED Led1
+    Led_initializeLed(Led1,1u,29u,Led_LowActive_Yes); // onboard LED Led1
     
     while (DEF_TRUE)
     {

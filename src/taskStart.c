@@ -2,10 +2,6 @@
 #include "taskLed.h"
 #include "taskButton.h"
 #include "taskUsbConnection.h"
-#include "ethernetLinkLayer.h"
-#include "ip.h"
-
-static const uint8_t targetIp[4u] = {10u, 42u, 0u, 1u};
 
 /*
 ************************************************************************************************
@@ -79,49 +75,8 @@ void App_TaskStart (void *p_arg)
                 (void       *)0,
                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                 (OS_ERR     *)&err);
-    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskReadTCB,
-                (CPU_CHAR   *)"EthernetRead",
-                (OS_TASK_PTR )EthernetLinkLayer_TaskRead,
-                (void       *)0,
-                (OS_PRIO     )5,
-                (CPU_STK    *)EthernetLinkLayer_TaskReadStk,
-                (CPU_STK_SIZE)0,
-                (CPU_STK_SIZE)APP_STACK_SIZE,
-                (OS_MSG_QTY  )0,
-                (OS_TICK     )0,
-                (void       *)0,
-                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                (OS_ERR     *)&err);
-    
-    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskWriteTCB,
-                (CPU_CHAR   *)"EthernetWrite",
-                (OS_TASK_PTR )EthernetLinkLayer_TaskWrite,
-                (void       *)0,
-                (OS_PRIO     )5,
-                (CPU_STK    *)EthernetLinkLayer_TaskWriteStk,
-                (CPU_STK_SIZE)0,
-                (CPU_STK_SIZE)APP_STACK_SIZE,
-                (OS_MSG_QTY  )0,
-                (OS_TICK     )0,
-                (void       *)0,
-                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                (OS_ERR     *)&err);
-    OSTaskCreate((OS_TCB     *)&EthernetLinkLayer_TaskProcessTCB,
-                (CPU_CHAR   *)"EthernetProcess",
-                (OS_TASK_PTR )EthernetLinkLayer_TaskProcess,
-                (void       *)0,
-                (OS_PRIO     )6,
-                (CPU_STK    *)EthernetLinkLayer_TaskProcessStk,
-                (CPU_STK_SIZE)0,
-                (CPU_STK_SIZE)APP_STACK_SIZE,
-                (OS_MSG_QTY  )0,
-                (OS_TICK     )0,
-                (void       *)0,
-                (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                (OS_ERR     *)&err);
 
     while (DEF_TRUE) {
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,OS_OPT_TIME_HMSM_STRICT,&err);
-         Ip_sendPing((uint8_t*)targetIp);
     }
 }
